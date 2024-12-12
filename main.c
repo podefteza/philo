@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 13:11:19 by carlos-j          #+#    #+#             */
-/*   Updated: 2024/12/12 16:00:30 by carlos-j         ###   ########.fr       */
+/*   Updated: 2024/12/12 17:43:30 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,31 +156,32 @@ sleeping = releases both forks after eating
 
 	struct timeval	start_time;
 	struct timeval	time_passed;
-	printf("=====================================================\n");
+	//printf("=====================================================\n");
 	gettimeofday(&start_time, NULL);
-	printf("Starting time: %ld\n", start_time.tv_sec);
-	printf("=====================================================\n");
+	//printf("Starting time: %ld\n", start_time.tv_sec);
+	//printf("=====================================================\n");
 	//gettimeofday(&time_passed, NULL);
 	//setup->elapsed_time = time_passed.tv_usec - start_time.tv_usec;
 	//printf("Time passed: %lld ms\n", setup->elapsed_time);
 
 	int i;
 	i = 0;
-	while (i <= setup->philosophers)
+	while (i < setup->philosophers)
 	{
-		printf("philos: %d\n", setup->philosophers);
-		if (i % 2 == 0)
+		if (i % 2 != 0)
 		{
-			while (setup->philos[i].meals <= setup->times_to_eat)
+			while (setup->philos[i].meals < setup->times_to_eat)
 			{
-				printf("%lld %d has taken a fork (%p)\n", setup->elapsed_time, setup->philos[i].id, setup->philos[i].left_fork);
-				printf("%lld %d has taken a fork (%p)\n", setup->elapsed_time, setup->philos[i].id, setup->philos[i].right_fork);
-				//printf("%lld %d has taken a fork\n", setup->elapsed_time, setup->philos[i].id);
-				//printf("%lld %d has taken a fork\n", setup->elapsed_time, setup->philos[i].id);
+				if (setup->philos[i].meals == setup->times_to_eat)
+					break ;
+				//printf("%lld %d has taken a fork (%p)\n", setup->elapsed_time, setup->philos[i].id, setup->philos[i].left_fork);
+				//printf("%lld %d has taken a fork (%p)\n", setup->elapsed_time, setup->philos[i].id, setup->philos[i].right_fork);
+				printf("%lld %d has taken a fork\n", setup->elapsed_time, setup->philos[i].id);
+				printf("%lld %d has taken a fork\n", setup->elapsed_time, setup->philos[i].id);
 				printf("%lld %d is eating\n", setup->elapsed_time, setup->philos[i].id);
 				setup->philos[i].meals++;
 				gettimeofday(&time_passed, NULL);
-				setup->elapsed_time = time_passed.tv_usec - start_time.tv_usec + setup->time_to_eat + setup->elapsed_time;
+				setup->elapsed_time += setup->time_to_eat + time_passed.tv_usec - start_time.tv_usec;
 			}
 		}
 		i++;
@@ -196,7 +197,7 @@ int	main(int argc, char **argv)
 	if (init_values(argc, argv, &setup))
 		return (0);
 	init_philos(&setup);
-	/*printf("philosophers: %d\ntime_to_die: %d\ntime_to_eat: %d\ntime_to_sleep: %d\ntimes_to_eat: %d\n", setup.philosophers, setup.time_to_die,
-		setup.time_to_eat, setup.time_to_sleep, setup.times_to_eat);*/
+	//printf("philosophers: %d\ntime_to_die: %d\ntime_to_eat: %d\ntime_to_sleep: %d\ntimes_to_eat: %d\n", setup.philosophers, setup.time_to_die,
+	//	setup.time_to_eat, setup.time_to_sleep, setup.times_to_eat);
 	task(&setup);
 }
