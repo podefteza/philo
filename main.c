@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 13:11:19 by carlos-j          #+#    #+#             */
-/*   Updated: 2024/12/12 15:47:29 by carlos-j         ###   ########.fr       */
+/*   Updated: 2024/12/12 16:00:30 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,19 +166,25 @@ sleeping = releases both forks after eating
 
 	int i;
 	i = 0;
-	while (setup->philos[i].meals <= setup->times_to_eat)
+	while (i <= setup->philosophers)
 	{
-		//printf("%lld %d has taken a fork (%p)\n", setup->elapsed_time, setup->philos[i].id, setup->philos[i].left_fork);
-		//printf("%lld %d has taken a fork (%p)\n", setup->elapsed_time, setup->philos[i].id, setup->philos[i].right_fork);
-		printf("%lld %d has taken a fork\n", setup->elapsed_time, setup->philos[i].id);
-		printf("%lld %d has taken a fork\n", setup->elapsed_time, setup->philos[i].id);
-		printf("%lld %d is eating\n", setup->elapsed_time, setup->philos[i].id);
-		setup->philos[i].meals++;
-		gettimeofday(&time_passed, NULL);
-		setup->elapsed_time = time_passed.tv_usec - start_time.tv_usec + setup->time_to_eat + setup->elapsed_time;
+		printf("philos: %d\n", setup->philosophers);
+		if (i % 2 == 0)
+		{
+			while (setup->philos[i].meals <= setup->times_to_eat)
+			{
+				printf("%lld %d has taken a fork (%p)\n", setup->elapsed_time, setup->philos[i].id, setup->philos[i].left_fork);
+				printf("%lld %d has taken a fork (%p)\n", setup->elapsed_time, setup->philos[i].id, setup->philos[i].right_fork);
+				//printf("%lld %d has taken a fork\n", setup->elapsed_time, setup->philos[i].id);
+				//printf("%lld %d has taken a fork\n", setup->elapsed_time, setup->philos[i].id);
+				printf("%lld %d is eating\n", setup->elapsed_time, setup->philos[i].id);
+				setup->philos[i].meals++;
+				gettimeofday(&time_passed, NULL);
+				setup->elapsed_time = time_passed.tv_usec - start_time.tv_usec + setup->time_to_eat + setup->elapsed_time;
+			}
+		}
+		i++;
 	}
-
-
 }
 
 int	main(int argc, char **argv)
