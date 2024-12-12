@@ -11,28 +11,49 @@
 /* ************************************************************************** */
 
 #ifndef PHILO_H
-#define PHILO_H
+# define PHILO_H
 
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/time.h>
-#include <pthread.h>
+# include <pthread.h>
+# include <stdio.h>
+# include <stdlib.h>
+# include <string.h>
+# include <sys/time.h>
+# include <unistd.h>
+
+// keep tracking of the current time
+// keep track of the number of times each philo ate + last time he ate
+
+struct setup;
+
+typedef struct philos
+{
+	struct setup	*setup;
+
+	int				id;
+	int				meals;
+	long long		last_meal;
+	pthread_t		thread;
+	pthread_mutex_t	*left_fork;
+	pthread_mutex_t	*right_fork;
+}					t_philos;
 
 typedef struct setup
 {
-	int philosophers;
-	int time_to_die;
-	int time_to_eat;
-	int time_to_sleep;
-	int times_to_eat;
+	t_philos		*philos;
 
-}	t_setup;
+	int				philosophers;
+	int				time_to_die;
+	int				time_to_eat;
+	int				time_to_sleep;
+	int				times_to_eat;
+	long long		start_time;
+	long long		elapsed_time;
+	pthread_mutex_t	*forks;
+	pthread_mutex_t	write_lock;
+	int				stop;
+}					t_setup;
 
-
-int	ft_isdigit(int c);
-long long	ft_atoi(const char *nptr);
-
+int					ft_isdigit(int c);
+long long			ft_atoi(const char *nptr);
 
 #endif
