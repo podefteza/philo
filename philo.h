@@ -40,16 +40,16 @@ typedef struct philos
 typedef struct setup
 {
 	t_philos		*philos;
-
 	int				philosophers;
 	int				time_to_die;
 	int				time_to_eat;
 	int				time_to_sleep;
 	int				times_to_eat;
-	long long		start_time;
+	struct timeval	start_time;
 	long long		elapsed_time;
 	pthread_mutex_t	*forks;
 	pthread_mutex_t	write_lock;
+	pthread_mutex_t stop_lock;
 	int				stop;
 }					t_setup;
 
