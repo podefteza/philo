@@ -60,9 +60,7 @@ pthread_mutex_unlock
 ==============================================================================
 
 TODO:
-- after all philos ate,	the program keeps running for a while instead of quitting
-should wait for the time_to_eat of that last philo,	and then show the message and quit.
-	if i can´t make that work, just delete the end message...
+- after a philo dies, it should terminate the program and the death show at the exit
 
 - program to stop working when a philo dies
 
@@ -95,13 +93,10 @@ void	*philosopher_routine(void *arg)
 	while (philo->setup->stop != 1)
 	{
 		if (philo->setup->stop == 1)
-			return (NULL);
+			break ;
 		pthread_mutex_lock(&philo->setup->stop_lock);
 		if (philo->setup->stop == 1)
-		{
-			//pthread_mutex_unlock(&philo->setup->stop_lock);
 			break ;
-		}
 		pthread_mutex_unlock(&philo->setup->stop_lock);
 		pthread_mutex_lock(&philo->setup->stop_lock);
 		philo->setup->elapsed_time = get_timestamp(philo->setup->start_time);
@@ -182,8 +177,7 @@ void	*check_starvation(void *arg)
 				if ((setup->elapsed_time - last_meal) > setup->time_to_die)
 				{
 					pthread_mutex_lock(&setup->stop_lock);
-					printf("%lld %d died\n", setup->elapsed_time,
-						setup->philos[i].id);
+					setup->is_dead = i + 1;
 					setup->stop = 1;
 					pthread_mutex_unlock(&setup->stop_lock);
 					return (NULL);
@@ -210,9 +204,6 @@ void	*check_starvation(void *arg)
 			{
 				usleep(setup->time_to_eat);
 				pthread_mutex_lock(&setup->stop_lock);
-				//printf("%lld ", setup->elapsed_time + setup->time_to_eat);
-				//printf("All philosophers have eaten %d times\n",
-				//	setup->times_to_eat);
 				setup->stop = 1;
 				pthread_mutex_unlock(&setup->stop_lock);
 				return (NULL);
@@ -288,6 +279,10 @@ int	main(int argc, char **argv)
 		printf("%lld ", setup.elapsed_time + setup.time_to_eat);
 		printf("All philosophers have eaten %d times\n",
 			setup.times_to_eat);
+	}
+	if (setup.is_dead != 0)
+	{
+		printf("%lld %d died\n", setup.elapsed_time, setup.philos[i].id);
 	}
 
 	// DEBUG ============ DELETE LATER...

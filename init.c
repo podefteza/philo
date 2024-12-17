@@ -63,6 +63,8 @@ int	init_values(int argc, char **argv, t_setup *setup)
 	setup->forks = malloc(sizeof(pthread_mutex_t) * setup->philosophers);
 	setup->philos = malloc(sizeof(t_philos) * setup->philosophers);
 	setup->stop = 0;
+	setup->all_eaten = 0;
+	setup->is_dead = 0;
 	i = 0;
 	while (i < setup->philosophers)
 	{
