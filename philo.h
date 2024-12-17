@@ -48,6 +48,7 @@ typedef struct setup
 	pthread_mutex_t	write_lock;
 	pthread_mutex_t	stop_lock;
 	int				stop;
+	int				all_eaten;
 }					t_setup;
 
 int					ft_isdigit(int c);
