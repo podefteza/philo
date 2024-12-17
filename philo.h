@@ -57,4 +57,6 @@ int					init_checks(int argc, char **argv);
 int					init_values(int argc, char **argv, t_setup *setup);
 void				init_philos(t_setup *setup);
 
+void	*check_starvation(void *arg);
+
 #endif
