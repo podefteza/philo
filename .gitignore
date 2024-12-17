@@ -1,5 +1,7 @@
 # philo
 philo
+./42-philosophers-tester/
+./tests/
 
 # Prerequisites
 *.d

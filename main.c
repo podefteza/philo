@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 13:11:19 by carlos-j          #+#    #+#             */
-/*   Updated: 2024/12/16 18:33:39 by carlos-j         ###   ########.fr       */
+/*   Updated: 2024/12/17 13:44:39 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,11 @@ TODO:
 - after all philos ate,	the program keeps running for a while instead of quitting
 should wait for the time_to_eat of that last philo,	and then show the message and quit.
 
+- program stop working when a philo dies
+
+
+https://github.com/dantonik/42-philosophers-tester
+
 */
 
 #include "philo.h"
@@ -78,95 +83,19 @@ long long	get_timestamp(struct timeval start_time)
 		+ (current_time.tv_usec - start_time.tv_usec) / 1000);
 }
 
-int	init_checks(int argc, char **argv)
-{
-	int	i;
-	int	args;
-
-	if (argc < 5 || argc > 6)
-	{
-		printf("Usage: ./philo number_of_philosophers time_to_die time_to_eat");
-		printf(" time_to_sleep [number_of_times_each_philosopher_must_eat]\n");
-		return (1);
-	}
-	i = 0;
-	args = argc - 1;
-	while (args > 1)
-	{
-		while (argv[args][i])
-		{
-			if (!ft_isdigit(argv[args][i]))
-			{
-				printf("Error. Test only with positive integer numbers.\n");
-				return (1);
-			}
-			i++;
-		}
-		args--;
-	}
-	return (0);
-}
-
-int	init_values(int argc, char **argv, t_setup *setup)
-{
-	int	i;
-
-	setup->philosophers = ft_atoi(argv[1]);
-	setup->time_to_die = ft_atoi(argv[2]);
-	setup->time_to_eat = ft_atoi(argv[3]);
-	setup->time_to_sleep = ft_atoi(argv[4]);
-	if (argc == 6)
-		setup->times_to_eat = ft_atoi(argv[5]);
-	else
-		setup->times_to_eat = 0;
-	if (setup->philosophers <= 0 || setup->time_to_die <= 0
-		|| setup->time_to_eat <= 0 || setup->time_to_sleep <= 0
-		|| setup->times_to_eat < 0)
-	{
-		printf("Error. Test only with positive integer numbers.\n");
-		return (1);
-	}
-	setup->forks = malloc(sizeof(pthread_mutex_t) * setup->philosophers);
-	setup->philos = malloc(sizeof(t_philos) * setup->philosophers);
-	setup->stop = 0;
-	i = 0;
-	while (i < setup->philosophers)
-	{
-		pthread_mutex_init(&setup->forks[i], NULL);
-		i++;
-	}
-	pthread_mutex_init(&setup->write_lock, NULL);
-	pthread_mutex_init(&setup->stop_lock, NULL);
-	return (0);
-}
-
-void	init_philos(t_setup *setup)
-{
-	int	i;
-
-	i = 0;
-	while (i < setup->philosophers)
-	{
-		setup->philos[i].id = i + 1;
-		setup->philos[i].meals = 0;
-		setup->philos[i].last_meal = get_timestamp(setup->start_time);
-		setup->philos[i].setup = setup;
-		setup->philos[i].left_fork = &setup->forks[i];
-		setup->philos[i].right_fork = &setup->forks[(i + 1)
-			% setup->philosophers];
-		i++;
-	}
-}
-
 void	*philosopher_routine(void *arg)
 {
 	t_philos	*philo;
 
 	philo = (t_philos *)arg;
+	if (philo->setup->stop == 1)
+			return (NULL);
 	if (philo->id % 2 == 0)
 		usleep(philo->setup->time_to_eat * 1000 / 2);
 	while (1) // or setup->stop != 1
 	{
+		if (philo->setup->stop == 1)
+			return (NULL);
 		pthread_mutex_lock(&philo->setup->stop_lock);
 		if (philo->setup->stop == 1)
 		{
@@ -186,13 +115,16 @@ void	*philosopher_routine(void *arg)
 
 		// Eating phase
 		pthread_mutex_lock(&philo->setup->stop_lock);
-		philo->last_meal = philo->setup->elapsed_time; // Update last meal time
+		philo->last_meal = philo->setup->elapsed_time;
 		pthread_mutex_unlock(&philo->setup->stop_lock);
 		philo->meals++;
 		printf("%lld %d is eating\n", philo->setup->elapsed_time, philo->id);
-		usleep(philo->setup->time_to_eat * 1000); // Simulate eating
+		usleep(philo->setup->time_to_eat * 1000);
 		pthread_mutex_unlock(philo->right_fork);
 		pthread_mutex_unlock(philo->left_fork);
+
+		if (philo->setup->stop == 1)
+			return (NULL);
 
 		// Sleeping phase
 		pthread_mutex_lock(&philo->setup->stop_lock);
@@ -200,6 +132,9 @@ void	*philosopher_routine(void *arg)
 		pthread_mutex_unlock(&philo->setup->stop_lock);
 		printf("%lld %d is sleeping\n", philo->setup->elapsed_time, philo->id);
 		usleep(philo->setup->time_to_sleep * 1000);
+
+		if (philo->setup->stop == 1)
+			return (NULL);
 
 		// Thinking phase
 		pthread_mutex_lock(&philo->setup->stop_lock);
@@ -218,7 +153,7 @@ void	*check_starvation(void *arg)
 	int			all_eaten;
 
 	setup = (t_setup *)arg;
-	while (1) // or setup->stop != 1
+	while (setup->stop != 1)
 	{
 		pthread_mutex_lock(&setup->stop_lock);
 		setup->elapsed_time = get_timestamp(setup->start_time);
@@ -242,6 +177,8 @@ void	*check_starvation(void *arg)
 				}
 			}
 			i++;
+			if (setup->stop == 1)
+				break;
 		}
 		if (setup->times_to_eat > 0)
 		{
@@ -258,6 +195,7 @@ void	*check_starvation(void *arg)
 			}
 			if (all_eaten)
 			{
+				usleep(setup->time_to_eat);
 				pthread_mutex_lock(&setup->stop_lock);
 				printf("%lld ", setup->elapsed_time + setup->time_to_eat);
 				printf("All philosophers have eaten %d times\n",
@@ -328,13 +266,14 @@ int	main(int argc, char **argv)
 		return (0);
 
 	// DEBUG ============ DELETE LATER...
-	printf("Simulation ended. Meals summary:\n");
+	printf("======== Simulation ended ========\n");
 	while (i < setup.philosophers)
 	{
 		printf("Philosopher %d ate %d times\n", setup.philos[i].id,
 			setup.philos[i].meals);
 		i++;
 	}
+	printf("======== Meals summary ========\n");/**/
 	i = 0;
 	while (i < setup.philosophers)
 	{

@@ -20,9 +20,6 @@
 # include <sys/time.h>
 # include <unistd.h>
 
-// keep tracking of the current time
-// keep track of the number of times each philo ate + last time he ate
-
 struct setup;
 
 typedef struct philos
@@ -49,11 +46,15 @@ typedef struct setup
 	long long		elapsed_time;
 	pthread_mutex_t	*forks;
 	pthread_mutex_t	write_lock;
-	pthread_mutex_t stop_lock;
+	pthread_mutex_t	stop_lock;
 	int				stop;
 }					t_setup;
 
 int					ft_isdigit(int c);
 long long			ft_atoi(const char *nptr);
+long long			get_timestamp(struct timeval start_time);;
+int					init_checks(int argc, char **argv);
+int					init_values(int argc, char **argv, t_setup *setup);
+void				init_philos(t_setup *setup);
 
 #endif
