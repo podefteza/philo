@@ -32,6 +32,8 @@ typedef struct philos
 	pthread_t		thread;
 	pthread_mutex_t	*left_fork;
 	pthread_mutex_t	*right_fork;
+	pthread_mutex_t	meals_lock;
+	pthread_mutex_t	last_meal_lock;
 }					t_philos;
 
 typedef struct setup
@@ -44,6 +46,7 @@ typedef struct setup
 	int				times_to_eat;
 	struct timeval	start_time;
 	long long		elapsed_time;
+	pthread_mutex_t time_lock;
 	pthread_mutex_t	*forks;
 	pthread_mutex_t	write_lock;
 	pthread_mutex_t	stop_lock;

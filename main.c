@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 13:11:19 by carlos-j          #+#    #+#             */
-/*   Updated: 2024/12/17 16:21:40 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/09 17:24:54 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,9 +60,9 @@ pthread_mutex_unlock
 ==============================================================================
 
 TODO:
-- after a philo dies, it should terminate the program and the death show at the exit
-
-- program to stop working when a philo dies
+- add debug mode:
+	- show nr of meals eaten by each philo after each meal
+	- print summary
 
 
 https://github.com/dantonik/42-philosophers-tester
@@ -82,208 +82,273 @@ long long	get_timestamp(struct timeval start_time)
 
 void	*philosopher_routine(void *arg)
 {
-	t_philos	*philo;
+    t_philos	*philo;
+    int         stop;
 
-	philo = (t_philos *)arg;
-	if (philo->setup->stop == 1)
-			return (NULL);
+    philo = (t_philos *)arg;
 
-	if (philo->id % 2 == 0)
-		usleep(philo->setup->time_to_eat * 1000 / 2);
-	while (philo->setup->stop != 1)
+	// Handle single philosopher case
+	if (philo->setup->philosophers == 1)
 	{
-		if (philo->setup->stop == 1)
-			break ;
+		pthread_mutex_lock(&philo->setup->write_lock);
+		printf("%lld %d has taken a fork\n", get_timestamp(philo->setup->start_time), philo->id);
+		pthread_mutex_unlock(&philo->setup->write_lock);
+
+		usleep(philo->setup->time_to_die * 1000); // Wait for philosopher to die
+
 		pthread_mutex_lock(&philo->setup->stop_lock);
-		if (philo->setup->stop == 1)
-			break ;
+		philo->setup->stop = 1; // Set the stop flag
 		pthread_mutex_unlock(&philo->setup->stop_lock);
-		pthread_mutex_lock(&philo->setup->stop_lock);
-		philo->setup->elapsed_time = get_timestamp(philo->setup->start_time);
-		pthread_mutex_unlock(&philo->setup->stop_lock);
-		pthread_mutex_lock(philo->left_fork);
-		if (philo->setup->stop == 1)
-			break ;
-		printf("%lld %d has taken a fork\n", philo->setup->elapsed_time,
-			philo->id);
-		if (philo->setup->philosophers == 1)
-		{
-			usleep(philo->setup->time_to_die);
-			philo->setup->stop = 1;
-			printf("%lld 1 died\n", philo->setup->elapsed_time +  philo->setup->time_to_die);
-			break;
-		}
 
-		pthread_mutex_lock(philo->right_fork);
-		if (philo->setup->stop == 1)
-			break ;
-		printf("%lld %d has taken a fork\n", philo->setup->elapsed_time,
-			philo->id);
+		pthread_mutex_lock(&philo->setup->write_lock);
+		printf("%lld %d died\n", get_timestamp(philo->setup->start_time), philo->id);
+		pthread_mutex_unlock(&philo->setup->write_lock);
 
-		// Eating phase
-		if (philo->setup->stop == 1)
-			break ;
-		pthread_mutex_lock(&philo->setup->stop_lock);
-		philo->last_meal = philo->setup->elapsed_time;
-		pthread_mutex_unlock(&philo->setup->stop_lock);
-		philo->meals++;
-		printf("%lld %d is eating\n", philo->setup->elapsed_time, philo->id);
-		usleep(philo->setup->time_to_eat * 1000);
-		pthread_mutex_unlock(philo->right_fork);
-		pthread_mutex_unlock(philo->left_fork);
-
-		if (philo->setup->stop == 1)
-			break ;
-
-		// Sleeping phase
-		pthread_mutex_lock(&philo->setup->stop_lock);
-		philo->setup->elapsed_time = get_timestamp(philo->setup->start_time);
-		pthread_mutex_unlock(&philo->setup->stop_lock);
-		printf("%lld %d is sleeping\n", philo->setup->elapsed_time, philo->id);
-		usleep(philo->setup->time_to_sleep * 1000);
-
-		if (philo->setup->stop == 1)
-			break ;
-
-		// Thinking phase
-		pthread_mutex_lock(&philo->setup->stop_lock);
-		philo->setup->elapsed_time = get_timestamp(philo->setup->start_time);
-		pthread_mutex_unlock(&philo->setup->stop_lock);
-		printf("%lld %d is thinking\n", philo->setup->elapsed_time, philo->id);
+		pthread_mutex_unlock(philo->left_fork); // Unlock the fork
+		return (NULL); // Exit the thread
 	}
-	return (NULL);
+
+    if (philo->id % 2 == 0)
+        usleep(philo->setup->time_to_eat * 1000 / 2);
+
+    while (1)
+    {
+        // Check if simulation should stop
+        pthread_mutex_lock(&philo->setup->stop_lock);
+        stop = philo->setup->stop;
+        pthread_mutex_unlock(&philo->setup->stop_lock);
+        if (stop)
+            return (NULL);
+
+        // Take first fork
+        pthread_mutex_lock(philo->left_fork);
+
+		 // Check stop immediately after taking a fork
+        pthread_mutex_lock(&philo->setup->stop_lock);
+        stop = philo->setup->stop;
+        pthread_mutex_unlock(&philo->setup->stop_lock);
+        if (stop)
+        {
+            pthread_mutex_unlock(philo->left_fork);
+            return (NULL);
+        }
+
+        pthread_mutex_lock(&philo->setup->write_lock);
+        printf("%lld %d has taken a fork\n", get_timestamp(philo->setup->start_time), philo->id);
+        pthread_mutex_unlock(&philo->setup->write_lock);
+
+        // Take second fork
+        pthread_mutex_lock(philo->right_fork);
+        pthread_mutex_lock(&philo->setup->stop_lock);
+        stop = philo->setup->stop;
+        pthread_mutex_unlock(&philo->setup->stop_lock);
+        if (stop)
+        {
+            pthread_mutex_unlock(philo->right_fork);
+            return (NULL);
+        }
+		pthread_mutex_lock(&philo->setup->write_lock);
+        printf("%lld %d has taken a fork\n", get_timestamp(philo->setup->start_time), philo->id);
+        pthread_mutex_unlock(&philo->setup->write_lock);
+
+        // Eating
+        pthread_mutex_lock(&philo->last_meal_lock);
+        philo->last_meal = get_timestamp(philo->setup->start_time);
+		pthread_mutex_unlock(&philo->last_meal_lock);
+		pthread_mutex_lock(&philo->meals_lock);
+	    philo->meals++;
+		pthread_mutex_unlock(&philo->meals_lock);
+
+
+        pthread_mutex_lock(&philo->setup->write_lock);
+        printf("%lld %d is eating\n", get_timestamp(philo->setup->start_time), philo->id);
+        pthread_mutex_unlock(&philo->setup->write_lock);
+
+        usleep(philo->setup->time_to_eat * 1000);
+        pthread_mutex_unlock(philo->right_fork);
+        pthread_mutex_unlock(philo->left_fork);
+
+        // Check stop before sleeping
+        pthread_mutex_lock(&philo->setup->stop_lock);
+        stop = philo->setup->stop;
+        pthread_mutex_unlock(&philo->setup->stop_lock);
+        if (stop)
+            return (NULL);
+
+        // Sleeping
+        pthread_mutex_lock(&philo->setup->write_lock);
+        printf("%lld %d is sleeping\n", get_timestamp(philo->setup->start_time), philo->id);
+        pthread_mutex_unlock(&philo->setup->write_lock);
+        usleep(philo->setup->time_to_sleep * 1000);
+
+        // Thinking
+        pthread_mutex_lock(&philo->setup->stop_lock);
+        stop = philo->setup->stop;
+        pthread_mutex_unlock(&philo->setup->stop_lock);
+        if (stop)
+        {
+            pthread_mutex_unlock(philo->left_fork);
+            return (NULL);
+        }
+        pthread_mutex_lock(&philo->setup->write_lock);
+        printf("%lld %d is thinking\n", get_timestamp(philo->setup->start_time), philo->id);
+        pthread_mutex_unlock(&philo->setup->write_lock);
+    }
+    return (NULL);
 }
 
 void	*check_starvation(void *arg)
 {
-	t_setup		*setup;
-	int			i;
-	long long	last_meal;
+    t_setup		*setup;
+    int			i;
+    long long	last_meal;
+    long long   current_time;
+    int         stop;
+	int all_eaten = 0;
 
-	setup = (t_setup *)arg;
-	while (setup->stop != 1)
-	{
-		pthread_mutex_lock(&setup->stop_lock);
-		setup->elapsed_time = get_timestamp(setup->start_time);
-		pthread_mutex_unlock(&setup->stop_lock);
-		i = 0;
-		while (i < setup->philosophers)
-		{
-			pthread_mutex_lock(&setup->stop_lock);
-			last_meal = setup->philos[i].last_meal;
-			pthread_mutex_unlock(&setup->stop_lock);
-			if (setup->philos[i].meals > 0 || setup->philosophers == 1)
-			{
-				if ((setup->elapsed_time - last_meal) > setup->time_to_die)
-				{
-					pthread_mutex_lock(&setup->stop_lock);
-					setup->is_dead = i + 1;
-					setup->stop = 1;
-					pthread_mutex_unlock(&setup->stop_lock);
-					return (NULL);
-				}
-			}
-			i++;
-			if (setup->stop == 1)
-				break;
-		}
-		if (setup->times_to_eat > 0)
-		{
-			setup->all_eaten = 1;
-			i = 0;
-			while (i < setup->philosophers)
-			{
-				if (setup->philos[i].meals < setup->times_to_eat)
-				{
-					setup->all_eaten = 0;
-					break ;
-				}
-				i++;
-			}
-			if (setup->all_eaten)
-			{
-				usleep(setup->time_to_eat);
-				pthread_mutex_lock(&setup->stop_lock);
-				setup->stop = 1;
-				pthread_mutex_unlock(&setup->stop_lock);
-				return (NULL);
-			}
-		}
-		usleep(1000);
-	}
-	return (NULL);
+    setup = (t_setup *)arg;
+    while (1)
+    {
+        // Check if simulation should stop
+        pthread_mutex_lock(&setup->stop_lock);
+        stop = setup->stop;
+        pthread_mutex_unlock(&setup->stop_lock);
+        if (stop)
+            return (NULL);
+
+        current_time = get_timestamp(setup->start_time);
+        i = 0;
+        while (i < setup->philosophers)
+        {
+            // Get last meal time safely
+            pthread_mutex_lock(&setup->philos[i].last_meal_lock);
+            last_meal = setup->philos[i].last_meal;
+			pthread_mutex_unlock(&setup->philos[i].last_meal_lock);
+			pthread_mutex_lock(&setup->philos[i].meals_lock);
+            int meals = setup->philos[i].meals;
+            pthread_mutex_unlock(&setup->philos[i].meals_lock);
+
+            // Check for death
+            if (meals > 0)
+            {
+                if ((current_time - last_meal) > setup->time_to_die)
+                {
+                    pthread_mutex_lock(&setup->stop_lock);
+                    setup->is_dead = i + 1;
+                    setup->stop = 1;
+                    pthread_mutex_unlock(&setup->stop_lock);
+                    pthread_mutex_lock(&setup->write_lock);
+                    printf("%lld %d died\n", current_time, setup->philos[i].id);
+                    pthread_mutex_unlock(&setup->write_lock);
+                    return (NULL);
+                }
+            }
+            i++;
+        }
+        // Check if all philosophers have eaten enough
+        if (setup->times_to_eat > 0)
+        {
+            all_eaten = 1;
+            for (i = 0; i < setup->philosophers; i++)
+            {
+                pthread_mutex_lock(&setup->philos[i].meals_lock);
+                if (setup->philos[i].meals < setup->times_to_eat)
+                {
+                    all_eaten = 0;
+                    pthread_mutex_unlock(&setup->philos[i].meals_lock);
+                    break;
+                }
+                pthread_mutex_unlock(&setup->philos[i].meals_lock);
+            }
+
+            if (all_eaten)
+            {
+                pthread_mutex_lock(&setup->stop_lock);
+                setup->all_eaten = 1;
+                setup->stop = 1;
+                pthread_mutex_unlock(&setup->stop_lock);
+                return (NULL);
+            }
+        }
+        usleep(1000);
+    }
+    return (NULL);
 }
 
-int	task(t_setup *setup)
+int task(t_setup *setup)
 {
-	pthread_t	monitor_thread;
-	int			i;
+    pthread_t monitor_thread;
+    int i;
 
-	if (pthread_create(&monitor_thread, NULL, check_starvation, setup) != 0)
-	{
-		printf("Error: Failed to create monitoring thread\n");
-		return (1);
-	}
-	i = 0;
-	while (i < setup->philosophers)
-	{
-		if (pthread_create(&setup->philos[i].thread, NULL, philosopher_routine,
-				&setup->philos[i]) != 0)
-		{
-			pthread_mutex_lock(&setup->stop_lock);
-			setup->stop = 1;
-			pthread_mutex_unlock(&setup->stop_lock);
-			break ;
-		}
-		i++;
-	}
-	i = 0;
-	while (i < setup->philosophers)
-	{
-		pthread_mutex_lock(&setup->stop_lock);
-		if (setup->stop == 1)
-		{
-			pthread_mutex_unlock(&setup->stop_lock);
-			break ;
-		}
-		pthread_mutex_unlock(&setup->stop_lock);
-		pthread_join(setup->philos[i].thread, NULL);
-		i++;
-	}
-	pthread_join(monitor_thread, NULL);
-	i = 0;
-	while (i < setup->philosophers)
-	{
-		pthread_detach(setup->philos[i].thread);
-		i++;
-	}
-	return (0);
+    if (pthread_create(&monitor_thread, NULL, check_starvation, setup) != 0)
+    {
+        printf("Error: Failed to create monitoring thread\n");
+        return (1);
+    }
+
+    // Create all philosopher threads first
+    i = 0;
+    while (i < setup->philosophers)
+    {
+        if (pthread_create(&setup->philos[i].thread, NULL, philosopher_routine,
+                &setup->philos[i]) != 0)
+        {
+            pthread_mutex_lock(&setup->stop_lock);
+            setup->stop = 1;
+            pthread_mutex_unlock(&setup->stop_lock);
+            break;
+        }
+        i++;
+    }
+
+    // Join all created threads, even if stop is set
+    i = 0;
+    while (i < setup->philosophers)
+    {
+        if (pthread_join(setup->philos[i].thread, NULL) != 0)
+        {
+            printf("Error joining thread %d\n", i);
+        }
+        i++;
+    }
+
+    // Join monitor thread last
+    pthread_join(monitor_thread, NULL);
+    return (0);
 }
+
 
 int	main(int argc, char **argv)
 {
 	t_setup	setup;
 	int		i;
 
-	i = 0;
 	if (init_checks(argc, argv))
 		return (0);
 	if (init_values(argc, argv, &setup))
 		return (0);
 	init_philos(&setup);
 	gettimeofday(&setup.start_time, NULL);
+
+	// Run the simulation
 	if (task(&setup) == 1)
 		return (0);
+
+	// Update elapsed_time before printing results
+	pthread_mutex_lock(&setup.time_lock);
+	setup.elapsed_time = get_timestamp(setup.start_time);
+	pthread_mutex_unlock(&setup.time_lock);
+
+	// Print final messages based on simulation outcome
 	if (setup.all_eaten == 1)
 	{
-		printf("%lld ", setup.elapsed_time + setup.time_to_eat);
-		printf("All philosophers have eaten %d times\n",
-			setup.times_to_eat);
+		printf("%lld All philosophers have eaten %d times\n",
+			setup.elapsed_time, setup.times_to_eat);
 	}
-	if (setup.is_dead != 0)
-	{
-		printf("%lld %d died\n", setup.elapsed_time, setup.philos[i].id);
-	}
+	//if (setup.is_dead != 0)
+	//{
+	//	printf("%lld %d died\n", setup.elapsed_time, setup.is_dead);
+	//}
 
 	// DEBUG ============ DELETE LATER...
 	/*printf("======== Simulation ended ========\n");
@@ -295,13 +360,19 @@ int	main(int argc, char **argv)
 	}
 	printf("======== Meals summary ========\n");*/
 	i = 0;
-	while (i < setup.philosophers)
+
+	// Cleanup resources
+	for (i = 0; i < setup.philosophers; i++)
 	{
 		pthread_mutex_destroy(&setup.forks[i]);
-		i++;
+		pthread_mutex_destroy(&setup.philos[i].meals_lock);
+		pthread_mutex_destroy(&setup.philos[i].last_meal_lock);
+		//pthread_mutex_destroy(setup.philos[i].left_fork);
+		//pthread_mutex_destroy(setup.philos[i].right_fork);
 	}
 	pthread_mutex_destroy(&setup.write_lock);
 	pthread_mutex_destroy(&setup.stop_lock);
+	pthread_mutex_destroy(&setup.time_lock);
 	free(setup.forks);
 	free(setup.philos);
 	return (0);

@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/17 12:32:02 by carlos-j          #+#    #+#             */
-/*   Updated: 2024/12/17 12:50:10 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/09 17:11:45 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,7 @@ int	init_values(int argc, char **argv, t_setup *setup)
 	}
 	pthread_mutex_init(&setup->write_lock, NULL);
 	pthread_mutex_init(&setup->stop_lock, NULL);
+	pthread_mutex_init(&setup->time_lock, NULL);
 	return (0);
 }
 
@@ -90,6 +91,8 @@ void	init_philos(t_setup *setup)
 		setup->philos[i].left_fork = &setup->forks[i];
 		setup->philos[i].right_fork = &setup->forks[(i + 1)
 			% setup->philosophers];
+		pthread_mutex_init(&setup->philos[i].meals_lock, NULL);
+		pthread_mutex_init(&setup->philos[i].last_meal_lock, NULL);
 		i++;
 	}
 }

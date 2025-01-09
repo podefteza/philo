@@ -6,22 +6,23 @@
 #    By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/12/12 11:09:54 by carlos-j          #+#    #+#              #
-#    Updated: 2024/12/17 12:32:40 by carlos-j         ###   ########.fr        #
+#    Updated: 2025/01/09 17:24:52 by carlos-j         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME = philo
-
-CC = cc -Wall -Wextra -Werror -pthread
+CC = cc
+#CFLAGS = -Wall -Wextra -Werror -pthread
+CFLAGS = -Wall -Wextra -Werror -pthread -fsanitize=thread
 
 SRCS = main.c utils.c init.c
-
 OBJS = ${SRCS:.c=.o}
 
-all = ${NAME}
+NAME = philo
+
+all: ${NAME}
 
 ${NAME}: ${OBJS}
-	$(CC) $(OBJS) -o $(NAME)
+	${CC} ${CFLAGS} ${OBJS} -o ${NAME}
 	@echo "Compilation successful."
 
 clean:
