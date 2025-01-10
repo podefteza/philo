@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/17 12:32:02 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/09 17:11:45 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/09 20:31:55 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,8 @@ void	init_philos(t_setup *setup)
 	{
 		setup->philos[i].id = i + 1;
 		setup->philos[i].meals = 0;
-		setup->philos[i].last_meal = get_timestamp(setup->start_time);
+		//setup->philos[i].last_meal = get_timestamp(setup->start_time);
+		setup->philos[i].last_meal = 0;
 		setup->philos[i].setup = setup;
 		setup->philos[i].left_fork = &setup->forks[i];
 		setup->philos[i].right_fork = &setup->forks[(i + 1)
