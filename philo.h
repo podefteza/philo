@@ -20,11 +20,11 @@
 # include <sys/time.h>
 # include <unistd.h>
 
-struct setup;
+struct	s_setup;
 
-typedef struct philos
+typedef struct s_philos
 {
-	struct setup	*setup;
+	struct s_setup	*setup;
 
 	int				id;
 	int				meals;
@@ -36,7 +36,7 @@ typedef struct philos
 	pthread_mutex_t	last_meal_lock;
 }					t_philos;
 
-typedef struct setup
+typedef struct s_setup
 {
 	t_philos		*philos;
 	int				philosophers;
@@ -46,7 +46,7 @@ typedef struct setup
 	int				times_to_eat;
 	struct timeval	start_time;
 	long long		elapsed_time;
-	pthread_mutex_t time_lock;
+	pthread_mutex_t	time_lock;
 	pthread_mutex_t	*forks;
 	pthread_mutex_t	write_lock;
 	pthread_mutex_t	stop_lock;
@@ -57,11 +57,11 @@ typedef struct setup
 
 int					ft_isdigit(int c);
 long long			ft_atoi(const char *nptr);
-long long			get_timestamp(struct timeval start_time);;
+long long			get_timestamp(struct timeval start_time);
 int					init_checks(int argc, char **argv);
-int					init_values(int argc, char **argv, t_setup *setup);
+int					init_args(int argc, char **argv, t_setup *setup);
+int					init_values(t_setup *setup);
 void				init_philos(t_setup *setup);
-
-void	*check_starvation(void *arg);
+void				*check_starvation(void *arg);
 
 #endif

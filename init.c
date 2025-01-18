@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/17 12:32:02 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/09 20:31:55 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/18 14:36:08 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,10 +41,8 @@ int	init_checks(int argc, char **argv)
 	return (0);
 }
 
-int	init_values(int argc, char **argv, t_setup *setup)
+int	init_args(int argc, char **argv, t_setup *setup)
 {
-	int	i;
-
 	setup->philosophers = ft_atoi(argv[1]);
 	setup->time_to_die = ft_atoi(argv[2]);
 	setup->time_to_eat = ft_atoi(argv[3]);
@@ -60,6 +58,13 @@ int	init_values(int argc, char **argv, t_setup *setup)
 		printf("Error. Test only with positive integer numbers.\n");
 		return (1);
 	}
+	return (0);
+}
+
+int	init_values(t_setup *setup)
+{
+	int	i;
+
 	setup->forks = malloc(sizeof(pthread_mutex_t) * setup->philosophers);
 	setup->philos = malloc(sizeof(t_philos) * setup->philosophers);
 	setup->stop = 0;
@@ -86,7 +91,6 @@ void	init_philos(t_setup *setup)
 	{
 		setup->philos[i].id = i + 1;
 		setup->philos[i].meals = 0;
-		//setup->philos[i].last_meal = get_timestamp(setup->start_time);
 		setup->philos[i].last_meal = 0;
 		setup->philos[i].setup = setup;
 		setup->philos[i].left_fork = &setup->forks[i];
