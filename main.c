@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 13:11:19 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/10 11:24:35 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/15 09:06:14 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,8 +64,12 @@ TODO:
 	- show nr of meals eaten by each philo after each meal
 	- print summary
 
+- verify if makefile can contain tsanitize tag
+
 
 https://github.com/dantonik/42-philosophers-tester
+
+https://github.com/MichelleJiam/LazyPhilosophersTester
 
 */
 
@@ -397,11 +401,46 @@ int task(t_setup *setup)
     return (0);
 }
 
+void	cleanup_resources(t_setup *setup)
+{
+	int i;
+
+	i = 0;
+	while (i < setup->philosophers)
+	{
+		pthread_mutex_destroy(&setup->forks[i]);
+		pthread_mutex_destroy(&setup->philos[i].meals_lock);
+		pthread_mutex_destroy(&setup->philos[i].last_meal_lock);
+		i++;
+	}
+	pthread_mutex_destroy(&setup->write_lock);
+	pthread_mutex_destroy(&setup->stop_lock);
+	pthread_mutex_destroy(&setup->time_lock);
+	free(setup->forks);
+	free(setup->philos);
+
+}
+
+void	print_meals_summary(t_setup *setup)
+{
+	int i;
+
+	i = 0;
+	printf("\n========== Simulation ended ==========\n");
+	while (i < setup->philosophers)
+	{
+		printf("Philosopher %d ate %d times\n", setup->philos[i].id,
+			setup->philos[i].meals);
+		i++;
+	}
+	printf("========== Meals summary ==========\n");
+
+}
+
 
 int	main(int argc, char **argv)
 {
 	t_setup	setup;
-	int		i;
 
 	if (init_checks(argc, argv))
 		return (0);
@@ -420,31 +459,9 @@ int	main(int argc, char **argv)
 		printf("%lld All philosophers have eaten %d times\n",
 			setup.elapsed_time, setup.times_to_eat);
 	}
-
-	// DEBUG ============ DELETE LATER...
-	/*printf("======== Simulation ended ========\n");
-	while (i < setup.philosophers)
-	{
-		printf("Philosopher %d ate %d times\n", setup.philos[i].id,
-			setup.philos[i].meals);
-		i++;
-	}
-	printf("======== Meals summary ========\n");*/
-	i = 0;
-
-	// Cleanup resources
-	for (i = 0; i < setup.philosophers; i++)
-	{
-		pthread_mutex_destroy(&setup.forks[i]);
-		pthread_mutex_destroy(&setup.philos[i].meals_lock);
-		pthread_mutex_destroy(&setup.philos[i].last_meal_lock);
-		//pthread_mutex_destroy(setup.philos[i].left_fork);
-		//pthread_mutex_destroy(setup.philos[i].right_fork);
-	}
-	pthread_mutex_destroy(&setup.write_lock);
-	pthread_mutex_destroy(&setup.stop_lock);
-	pthread_mutex_destroy(&setup.time_lock);
-	free(setup.forks);
-	free(setup.philos);
+	#ifdef DEBUG
+		print_meals_summary(&setup);
+	#endif
+	cleanup_resources(&setup);
 	return (0);
 }
