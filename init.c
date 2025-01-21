@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/17 12:32:02 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/18 14:36:08 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/21 01:10:04 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,9 +51,14 @@ int	init_args(int argc, char **argv, t_setup *setup)
 		setup->times_to_eat = ft_atoi(argv[5]);
 	else
 		setup->times_to_eat = 0;
-	if (setup->philosophers <= 0 || setup->time_to_die <= 0
-		|| setup->time_to_eat <= 0 || setup->time_to_sleep <= 0
-		|| setup->times_to_eat < 0)
+	if (setup->philosophers <= 0 || setup->philosophers > MAX_PHILOSOPHERS)
+	{
+		printf("Error. Number of philosophers must be between 1 and %d.\n",
+			MAX_PHILOSOPHERS);
+		return (1);
+	}
+	if (setup->time_to_die <= 0 || setup->time_to_eat <= 0
+		|| setup->time_to_sleep <= 0 || setup->times_to_eat < 0)
 	{
 		printf("Error. Test only with positive integer numbers.\n");
 		return (1);

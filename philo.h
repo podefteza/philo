@@ -1,17 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   philo.h                                           :+:      :+:    :+:   */
+/*   philo.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/12 11:24:35 by carlos-j          #+#    #+#             */
-/*   Updated: 2024/12/12 11:26:08 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/21 01:43:53 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PHILO_H
 # define PHILO_H
+
+# define MAX_PHILOSOPHERS 200
 
 # include <pthread.h>
 # include <stdio.h>
@@ -58,10 +60,18 @@ typedef struct s_setup
 int					ft_isdigit(int c);
 long long			ft_atoi(const char *nptr);
 long long			get_timestamp(struct timeval start_time);
+int					get_stop_flag(t_setup *setup);
+void				*check_starvation(void *arg);
+int					log_action(t_philos *philo, const char *action);
+
+// init.c
 int					init_checks(int argc, char **argv);
 int					init_args(int argc, char **argv, t_setup *setup);
 int					init_values(t_setup *setup);
 void				init_philos(t_setup *setup);
-void				*check_starvation(void *arg);
+
+// take_forks.c
+int					take_forks(t_philos *philo);
+void				release_forks(t_philos *philo);
 
 #endif
