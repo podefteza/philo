@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 13:11:19 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/22 09:41:34 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/22 10:44:12 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,7 +99,7 @@ int	get_stop_flag(t_setup *setup)
 	return (stop);
 }
 
-void one_philo(t_philos *philo)
+void	one_philo(t_philos *philo)
 {
 	pthread_mutex_lock(&philo->setup->write_lock);
 	printf("%lld %d has taken a fork\n",
@@ -108,8 +108,8 @@ void one_philo(t_philos *philo)
 	usleep(philo->setup->time_to_die * 1000);
 	set_stop_flag(philo->setup, 1);
 	pthread_mutex_lock(&philo->setup->write_lock);
-	printf("%lld %d died\n",
-		get_timestamp(philo->setup->start_time), philo->id);
+	printf("%lld %d died\n", get_timestamp(philo->setup->start_time),
+		philo->id);
 	pthread_mutex_unlock(&philo->setup->write_lock);
 }
 
@@ -125,8 +125,8 @@ int	philo_eating(t_philos *philo)
 	philo->meals++;
 	pthread_mutex_unlock(&philo->meals_lock);
 	pthread_mutex_lock(&philo->setup->write_lock);
-	printf("%lld %d is eating\n",
-		get_timestamp(philo->setup->start_time), philo->id);
+	printf("%lld %d is eating\n", get_timestamp(philo->setup->start_time),
+		philo->id);
 	pthread_mutex_unlock(&philo->setup->write_lock);
 	eat_end = get_timestamp(philo->setup->start_time)
 		+ philo->setup->time_to_eat;
@@ -147,36 +147,30 @@ int	philo_sleeping(t_philos *philo)
 	long long	current_time;
 
 	pthread_mutex_lock(&philo->setup->write_lock);
-	printf("%lld %d is sleeping\n",
-		get_timestamp(philo->setup->start_time), philo->id);
+	printf("%lld %d is sleeping\n", get_timestamp(philo->setup->start_time),
+		philo->id);
 	pthread_mutex_unlock(&philo->setup->write_lock);
-
 	sleep_end = get_timestamp(philo->setup->start_time)
 		+ philo->setup->time_to_sleep;
 	while (!get_stop_flag(philo->setup))
 	{
 		current_time = get_timestamp(philo->setup->start_time);
 		if (current_time >= sleep_end)
-			break;
-		usleep(1000); // Check periodically for stop condition
+			break ;
+		usleep(1000);
 	}
 	return (!get_stop_flag(philo->setup));
 }
 
-
-int philo_thinking(t_philos *philo)
+int	philo_thinking(t_philos *philo)
 {
-    pthread_mutex_lock(&philo->setup->write_lock);
-    printf("%lld %d is thinking\n",
-        get_timestamp(philo->setup->start_time), philo->id);
-    pthread_mutex_unlock(&philo->setup->write_lock);
-
-    // Small delay to prevent CPU overload
-    usleep(500);
-
-    return (!get_stop_flag(philo->setup));
+	pthread_mutex_lock(&philo->setup->write_lock);
+	printf("%lld %d is thinking\n", get_timestamp(philo->setup->start_time),
+		philo->id);
+	pthread_mutex_unlock(&philo->setup->write_lock);
+	usleep(500);
+	return (!get_stop_flag(philo->setup));
 }
-
 
 void	delay_with_stop_check(t_setup *setup, long long delay_ms)
 {
@@ -208,8 +202,8 @@ void	*philosopher_routine(void *arg)
 		delay_with_stop_check(philo->setup, philo->setup->time_to_eat / 2);
 	while (!get_stop_flag(philo->setup))
 	{
-		if (!take_forks(philo) || !philo_eating(philo)
-			|| !philo_sleeping(philo) || !philo_thinking(philo))
+		if (!take_forks(philo) || !philo_eating(philo) || !philo_sleeping(philo)
+			|| !philo_thinking(philo))
 			break ;
 	}
 	return (NULL);
@@ -239,80 +233,82 @@ int	check_all_philosophers_eaten(t_setup *setup)
 	return (0);
 }
 
-void	*check_starvation(void *arg)
+int	check_philosopher_status(t_setup *setup, int i, long long *last_meal,
+		int *total_meals)
 {
-	t_setup		*setup;
+	long long	current_time;
+
+	pthread_mutex_lock(&setup->philos[i].last_meal_lock);
+	*last_meal = setup->philos[i].last_meal;
+	pthread_mutex_unlock(&setup->philos[i].last_meal_lock);
+	current_time = get_timestamp(setup->start_time);
+	if ((current_time - *last_meal) >= setup->time_to_die)
+	{
+		set_stop_flag(setup, 1);
+		pthread_mutex_lock(&setup->write_lock);
+		printf("%lld %d died\n", current_time, setup->philos[i].id);
+		pthread_mutex_unlock(&setup->write_lock);
+		return (1);
+	}
+	pthread_mutex_lock(&setup->philos[i].meals_lock);
+	if (setup->times_to_eat > 0
+		&& setup->philos[i].meals >= setup->times_to_eat)
+		(*total_meals)++;
+	pthread_mutex_unlock(&setup->philos[i].meals_lock);
+	return (0);
+}
+
+int	check_all_philosophers(t_setup *setup, int *total_meals)
+{
 	int			i;
 	long long	last_meal;
-	long long	current_time;
-	int			total_meals;
-	int			check_interval;
+
+	i = 0;
+	*total_meals = 0;
+	while (i < setup->philosophers)
+	{
+		if (get_stop_flag(setup))
+			return (1);
+		if (check_philosopher_status(setup, i, &last_meal, total_meals))
+			return (1);
+		i++;
+	}
+	return (0);
+}
+
+void	*check_starvation(void *arg)
+{
+	t_setup	*setup;
+	int		total_meals;
+	int		check_interval;
 
 	setup = (t_setup *)arg;
 	check_interval = (setup->time_to_die / 10) * 1000;
 	if (check_interval > 1000)
 		check_interval = 1000;
-
 	while (!get_stop_flag(setup) && (setup->philosophers != 1))
 	{
-		i = 0;
-		total_meals = 0;
-		while (i < setup->philosophers)
-		{
-			if (get_stop_flag(setup))
-				return (NULL);
-
-			// Check philosopher's last meal time
-			pthread_mutex_lock(&setup->philos[i].last_meal_lock);
-			last_meal = setup->philos[i].last_meal;
-			pthread_mutex_unlock(&setup->philos[i].last_meal_lock);
-
-			current_time = get_timestamp(setup->start_time);
-			if ((current_time - last_meal) >= setup->time_to_die)
-			{
-				// Philosopher has died
-				set_stop_flag(setup, 1);
-				pthread_mutex_lock(&setup->write_lock);
-				printf("%lld %d died\n", current_time, setup->philos[i].id);
-				pthread_mutex_unlock(&setup->write_lock);
-				return (NULL);
-			}
-
-			// Count philosophers that have eaten enough
-			pthread_mutex_lock(&setup->philos[i].meals_lock);
-			if (setup->times_to_eat > 0 && setup->philos[i].meals >= setup->times_to_eat)
-				total_meals++;
-			pthread_mutex_unlock(&setup->philos[i].meals_lock);
-
-			i++;
-		}
-
-		// End simulation if all philosophers have eaten enough
+		if (check_all_philosophers(setup, &total_meals))
+			return (NULL);
 		if (setup->times_to_eat > 0 && total_meals == setup->philosophers)
 		{
 			set_stop_flag(setup, 1);
+			usleep(setup->time_to_eat * 1000);
 			pthread_mutex_lock(&setup->write_lock);
 			printf("%lld All philosophers have eaten %d times\n",
-				   get_timestamp(setup->start_time), setup->times_to_eat);
+				get_timestamp(setup->start_time), setup->times_to_eat);
 			pthread_mutex_unlock(&setup->write_lock);
 			return (NULL);
 		}
-
 		usleep(check_interval);
 	}
 	return (NULL);
 }
 
-
-int	task(t_setup *setup)
+int	thread_creation(t_setup *setup, pthread_t *philosophers, pthread_t *monitor)
 {
-	pthread_t	*philosophers;
-	pthread_t	monitor;
-	int			i;
+	int	i;
 
-	philosophers = malloc(sizeof(pthread_t) * setup->philosophers);
-	if (!philosophers)
-		return (1);
 	i = 0;
 	while (i < setup->philosophers)
 	{
@@ -324,11 +320,25 @@ int	task(t_setup *setup)
 		}
 		i++;
 	}
-	if (pthread_create(&monitor, NULL, check_starvation, setup))
+	if (pthread_create(monitor, NULL, check_starvation, setup))
 	{
 		free(philosophers);
 		return (1);
 	}
+	return (0);
+}
+
+int	task(t_setup *setup)
+{
+	pthread_t	*philosophers;
+	pthread_t	monitor;
+	int			i;
+
+	philosophers = malloc(sizeof(pthread_t) * setup->philosophers);
+	if (!philosophers)
+		return (1);
+	if (thread_creation(setup, philosophers, &monitor))
+		return (1);
 	i = 0;
 	while (i < setup->philosophers)
 	{
@@ -388,12 +398,7 @@ int	main(int argc, char **argv)
 	gettimeofday(&setup.start_time, NULL);
 	if (task(&setup))
 		return (1);
-	pthread_mutex_lock(&setup.time_lock);
-	setup.elapsed_time = get_timestamp(setup.start_time);
-	pthread_mutex_unlock(&setup.time_lock);
-	if (setup.all_eaten == 1)
-		printf("All philosophers have eaten %d times\n", setup.times_to_eat);
-	//print_meals_summary(&setup);
+	// print_meals_summary(&setup);
 	cleanup_resources(&setup);
 	return (0);
 }
