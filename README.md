@@ -1,20 +1,15 @@
 # Philosophers Project: Overview
-The Philosophers project is an engaging simulation designed to test concurrency management using threads and mutexes in C. It demonstrates a classic problem in computer science often referred to as the "Dining Philosophers Problem."
+The Philosophers project is an engaging simulation designed to test concurrency management using threads and mutexes in C.
 
-## Key Concepts
-### Dining Philosophers Problem:
-- Philosophers alternate between eating, thinking, and sleeping.
-- To eat, a philosopher needs two forks: one on their left and one on their right.
-- Philosophers must avoid starving and minimize contention over shared resources (forks).
-
-### Simulation Details:
-- Each philosopher:
-  - Starts as a thread.
-  - Uses mutexes to acquire and release forks.
-- The simulation ends when:
-  - A philosopher dies due to starvation (hasn't eaten within time_to_die milliseconds).
-  - All philosophers have eaten at least number_of_times_each_philosopher_must_eat times (if specified).
+## Dining Philosophers Problem
+This project demonstrates a classic problem in computer science often referred to as the "Dining Philosophers Problem." Philosophers alternate between eating, thinking, and sleeping. To eat, a philosopher needs two forks: one on their left and one on their right. They must avoid starving and minimize contention over shared resources (forks).
  
+### Key Concepts
+- **Threads**: parts of the program responsible for performing specific tasks. Each philosopher in this simulation is represented as a thread, working independently to eat, sleep and think.
+- **Concurrency**: multiple tasks running at the same time while sharing resources. In this project, the philosophers represent tasks that need to share forks. Concurrency ensures that philosophers coordinate their actions so that no two philosophers attempt to grab the same fork simultaneously.
+- **Mutexes (Mutual Exclusion)**: tools used in multithreaded programs to manage access to shared resources and prevent race conditions. A race condition occurs when multiple threads access shared data simultaneously, leading to unexpected results. By locking a mutex, a thread gains exclusive access to a resource, ensuring no other thread can use it until the mutex is unlocked.
+- **Deadlocks**: occur when two or more threads are stuck waiting for each other, preventing any of them from proceeding. In this simulation, a deadlock could happen if every philosopher picks up one fork and waits indefinitely for the other fork to become available. Proper logic and synchronization prevent this situation.
+
 ## Program Features
 ```bash
 ./philo number_of_philosophers time_to_die time_to_eat time_to_sleep [number_of_times_each_philosopher_must_eat]
