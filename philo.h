@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/12 11:24:35 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/22 09:12:37 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/22 14:41:37 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 # include <sys/time.h>
 # include <unistd.h>
 
+struct	s_philos;
 struct	s_setup;
 
 typedef struct s_philos
@@ -57,14 +58,13 @@ typedef struct s_setup
 	int				is_dead;
 }					t_setup;
 
-int					ft_isdigit(int c);
-long long			ft_atoi(const char *nptr);
+// utils.c
+long long			ft_atoi(const char *nptr, int *error_flag);
 long long			get_timestamp(struct timeval start_time);
+void				set_stop_flag(t_setup *setup, int value);
 int					get_stop_flag(t_setup *setup);
-void				*check_starvation(void *arg);
 
 // init.c
-int					init_checks(int argc, char **argv);
 int					init_args(int argc, char **argv, t_setup *setup);
 int					init_values(t_setup *setup);
 void				init_philos(t_setup *setup);
@@ -72,5 +72,23 @@ void				init_philos(t_setup *setup);
 // take_forks.c
 int					take_forks(t_philos *philo);
 void				release_forks(t_philos *philo);
+
+// philo_actions.c
+int					philo_eating(t_philos *philo);
+int					philo_sleeping(t_philos *philo);
+int					philo_thinking(t_philos *philo);
+
+// philo_checker.c
+int					check_all_philosophers_eaten(t_setup *setup);
+int					check_philosopher_status(t_setup *setup, int i,
+						long long *last_meal, int *total_meals);
+int					check_all_philosophers(t_setup *setup, int *total_meals);
+void				*check_starvation(void *arg);
+
+// philo_routine.c
+int					task(t_setup *setup);
+
+// cleanup_resources.c
+void				cleanup_resources(t_setup *setup);
 
 #endif

@@ -6,14 +6,23 @@
 #    By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/12/12 11:09:54 by carlos-j          #+#    #+#              #
-#    Updated: 2025/01/21 01:21:37 by carlos-j         ###   ########.fr        #
+#    Updated: 2025/01/22 11:28:06 by carlos-j         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 CC = cc
+
 CFLAGS = -Wall -Wextra -Werror -pthread
 
-SRCS = main.c utils.c init.c take_forks.c
+SRCS = 	main.c \
+		utils.c \
+		init.c \
+		take_forks.c \
+		philo_actions.c \
+		philo_checker.c \
+		philo_routine.c \
+		cleanup_resources.c
+
 OBJS = ${SRCS:.c=.o}
 
 NAME = philo

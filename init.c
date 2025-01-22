@@ -6,58 +6,30 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/17 12:32:02 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/22 09:12:41 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/22 15:39:13 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-int	init_checks(int argc, char **argv)
-{
-	int	i;
-	int	args;
-
-	if (argc < 5 || argc > 6)
-	{
-		printf("Usage: ./philo number_of_philosophers time_to_die time_to_eat");
-		printf(" time_to_sleep [number_of_times_each_philosopher_must_eat]\n");
-		return (1);
-	}
-	i = 0;
-	args = argc - 1;
-	while (args > 1)
-	{
-		while (argv[args][i])
-		{
-			if (!ft_isdigit(argv[args][i]))
-			{
-				printf("Error. Test only with positive integer numbers.\n");
-				return (1);
-			}
-			i++;
-		}
-		args--;
-	}
-	return (0);
-}
-
 int	init_args(int argc, char **argv, t_setup *setup)
 {
-	setup->philosophers = ft_atoi(argv[1]);
-	setup->time_to_die = ft_atoi(argv[2]);
-	setup->time_to_eat = ft_atoi(argv[3]);
-	setup->time_to_sleep = ft_atoi(argv[4]);
+	int	error_flag;
+
+	error_flag = 0;
+	setup->philosophers = ft_atoi(argv[1], &error_flag);
+	setup->time_to_die = ft_atoi(argv[2], &error_flag);
+	setup->time_to_eat = ft_atoi(argv[3], &error_flag);
+	setup->time_to_sleep = ft_atoi(argv[4], &error_flag);
 	if (argc == 6)
-		setup->times_to_eat = ft_atoi(argv[5]);
+	{
+		setup->times_to_eat = ft_atoi(argv[5], &error_flag);
+		if (setup->times_to_eat == 0 && !error_flag)
+			return (1);
+	}
 	else
 		setup->times_to_eat = 0;
-	if (setup->philosophers <= 0 || setup->philosophers > MAX_PHILOSOPHERS)
-	{
-		printf("Error. Number of philosophers must be between 1 and %d.\n",
-			MAX_PHILOSOPHERS);
-		return (1);
-	}
-	if (setup->time_to_die <= 0 || setup->time_to_eat <= 0
+	if (error_flag || setup->time_to_die <= 0 || setup->time_to_eat <= 0
 		|| setup->time_to_sleep <= 0 || setup->times_to_eat < 0)
 	{
 		printf("Error. Test only with positive integer numbers.\n");
