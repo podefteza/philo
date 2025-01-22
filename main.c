@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 13:11:19 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/21 02:30:05 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/22 09:41:34 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,11 +60,9 @@ pthread_mutex_unlock
 ==============================================================================
 
 TODO:
-- add debug mode:
-	- show nr of meals eaten by each philo after each meal
-	- print summary
+- test with large arguments for times
 
-- verify if makefile can contain tsanitize tag
+- move functions to separate files
 
 
 https://github.com/dantonik/42-philosophers-tester
@@ -101,26 +99,18 @@ int	get_stop_flag(t_setup *setup)
 	return (stop);
 }
 
-static void	think_time(t_philos *philo)
-{
-	long long	time_to_think;
-
-	time_to_think = (philo->setup->time_to_die - (philo->setup->time_to_eat
-				+ philo->setup->time_to_sleep)) / 2;
-	if (time_to_think > 0)
-		usleep(time_to_think * 1000);
-}
-
-void	one_philo(t_philos *philo)
+void one_philo(t_philos *philo)
 {
 	pthread_mutex_lock(&philo->setup->write_lock);
 	printf("%lld %d has taken a fork\n",
 		get_timestamp(philo->setup->start_time), philo->id);
 	pthread_mutex_unlock(&philo->setup->write_lock);
 	usleep(philo->setup->time_to_die * 1000);
-	pthread_mutex_lock(&philo->setup->stop_lock);
-	philo->setup->stop = 1;
-	pthread_mutex_unlock(&philo->setup->stop_lock);
+	set_stop_flag(philo->setup, 1);
+	pthread_mutex_lock(&philo->setup->write_lock);
+	printf("%lld %d died\n",
+		get_timestamp(philo->setup->start_time), philo->id);
+	pthread_mutex_unlock(&philo->setup->write_lock);
 }
 
 int	philo_eating(t_philos *philo)
@@ -156,33 +146,37 @@ int	philo_sleeping(t_philos *philo)
 	long long	sleep_end;
 	long long	current_time;
 
+	pthread_mutex_lock(&philo->setup->write_lock);
+	printf("%lld %d is sleeping\n",
+		get_timestamp(philo->setup->start_time), philo->id);
+	pthread_mutex_unlock(&philo->setup->write_lock);
+
 	sleep_end = get_timestamp(philo->setup->start_time)
 		+ philo->setup->time_to_sleep;
 	while (!get_stop_flag(philo->setup))
 	{
 		current_time = get_timestamp(philo->setup->start_time);
 		if (current_time >= sleep_end)
-			break ;
-		usleep(1000);
+			break;
+		usleep(1000); // Check periodically for stop condition
 	}
-	if (get_stop_flag(philo->setup))
-		return (0);
-	pthread_mutex_lock(&philo->setup->write_lock);
-	printf("%lld %d is sleeping\n",
-		get_timestamp(philo->setup->start_time), philo->id);
-	pthread_mutex_unlock(&philo->setup->write_lock);
-	return (1);
-}
-
-int	philo_thinking(t_philos *philo)
-{
-	pthread_mutex_lock(&philo->setup->write_lock);
-	printf("%lld %d is thinking\n",
-		get_timestamp(philo->setup->start_time), philo->id);
-	pthread_mutex_unlock(&philo->setup->write_lock);
-	think_time(philo);
 	return (!get_stop_flag(philo->setup));
 }
+
+
+int philo_thinking(t_philos *philo)
+{
+    pthread_mutex_lock(&philo->setup->write_lock);
+    printf("%lld %d is thinking\n",
+        get_timestamp(philo->setup->start_time), philo->id);
+    pthread_mutex_unlock(&philo->setup->write_lock);
+
+    // Small delay to prevent CPU overload
+    usleep(500);
+
+    return (!get_stop_flag(philo->setup));
+}
+
 
 void	delay_with_stop_check(t_setup *setup, long long delay_ms)
 {
@@ -221,29 +215,6 @@ void	*philosopher_routine(void *arg)
 	return (NULL);
 }
 
-int	check_philosopher_death(t_setup *setup, int i)
-{
-	long long	last_meal;
-	long long	current_time;
-
-	pthread_mutex_lock(&setup->philos[i].last_meal_lock);
-	last_meal = setup->philos[i].last_meal;
-	pthread_mutex_unlock(&setup->philos[i].last_meal_lock);
-	current_time = get_timestamp(setup->start_time);
-	if (last_meal == 0)
-		last_meal = current_time;
-	if ((current_time - last_meal) >= setup->time_to_die)
-	{
-		set_stop_flag(setup, 1);
-		pthread_mutex_lock(&setup->write_lock);
-		printf("%lld %d died\n",
-			get_timestamp(setup->start_time), setup->philos[i].id);
-		pthread_mutex_unlock(&setup->write_lock);
-		return (1);
-	}
-	return (0);
-}
-
 int	check_all_philosophers_eaten(t_setup *setup)
 {
 	int	i;
@@ -272,28 +243,66 @@ void	*check_starvation(void *arg)
 {
 	t_setup		*setup;
 	int			i;
+	long long	last_meal;
+	long long	current_time;
+	int			total_meals;
 	int			check_interval;
 
 	setup = (t_setup *)arg;
 	check_interval = (setup->time_to_die / 10) * 1000;
 	if (check_interval > 1000)
 		check_interval = 1000;
-	while (!get_stop_flag(setup))
+
+	while (!get_stop_flag(setup) && (setup->philosophers != 1))
 	{
 		i = 0;
+		total_meals = 0;
 		while (i < setup->philosophers)
 		{
-			if (get_stop_flag(setup)
-				|| check_philosopher_death(setup, i))
+			if (get_stop_flag(setup))
 				return (NULL);
+
+			// Check philosopher's last meal time
+			pthread_mutex_lock(&setup->philos[i].last_meal_lock);
+			last_meal = setup->philos[i].last_meal;
+			pthread_mutex_unlock(&setup->philos[i].last_meal_lock);
+
+			current_time = get_timestamp(setup->start_time);
+			if ((current_time - last_meal) >= setup->time_to_die)
+			{
+				// Philosopher has died
+				set_stop_flag(setup, 1);
+				pthread_mutex_lock(&setup->write_lock);
+				printf("%lld %d died\n", current_time, setup->philos[i].id);
+				pthread_mutex_unlock(&setup->write_lock);
+				return (NULL);
+			}
+
+			// Count philosophers that have eaten enough
+			pthread_mutex_lock(&setup->philos[i].meals_lock);
+			if (setup->times_to_eat > 0 && setup->philos[i].meals >= setup->times_to_eat)
+				total_meals++;
+			pthread_mutex_unlock(&setup->philos[i].meals_lock);
+
 			i++;
 		}
-		if (setup->times_to_eat > 0 && check_all_philosophers_eaten(setup))
+
+		// End simulation if all philosophers have eaten enough
+		if (setup->times_to_eat > 0 && total_meals == setup->philosophers)
+		{
+			set_stop_flag(setup, 1);
+			pthread_mutex_lock(&setup->write_lock);
+			printf("%lld All philosophers have eaten %d times\n",
+				   get_timestamp(setup->start_time), setup->times_to_eat);
+			pthread_mutex_unlock(&setup->write_lock);
 			return (NULL);
+		}
+
 		usleep(check_interval);
 	}
 	return (NULL);
 }
+
 
 int	task(t_setup *setup)
 {

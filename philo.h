@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/12 11:24:35 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/21 01:43:53 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/22 09:12:37 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,6 @@ long long			ft_atoi(const char *nptr);
 long long			get_timestamp(struct timeval start_time);
 int					get_stop_flag(t_setup *setup);
 void				*check_starvation(void *arg);
-int					log_action(t_philos *philo, const char *action);
 
 // init.c
 int					init_checks(int argc, char **argv);
