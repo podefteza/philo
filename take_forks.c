@@ -6,13 +6,13 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/18 15:25:26 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/28 17:21:31 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/28 18:46:41 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-void	log_fork_taken(t_philos *philo)
+void	log_fork_taken(t_philo *philo)
 {
 	long long	timestamp;
 
@@ -23,7 +23,7 @@ void	log_fork_taken(t_philos *philo)
 	pthread_mutex_unlock(&philo->setup->write_lock);
 }
 
-static int	take_first_fork(t_philos *philo, pthread_mutex_t *first_fork)
+static int	take_first_fork(t_philo *philo, pthread_mutex_t *first_fork)
 {
 	pthread_mutex_lock(first_fork);
 	if (get_stop_flag(philo->setup))
@@ -35,7 +35,7 @@ static int	take_first_fork(t_philos *philo, pthread_mutex_t *first_fork)
 	return (1);
 }
 
-static int	take_second_fork(t_philos *philo, pthread_mutex_t *first_fork,
+static int	take_second_fork(t_philo *philo, pthread_mutex_t *first_fork,
 		pthread_mutex_t *second_fork)
 {
 	pthread_mutex_lock(second_fork);
@@ -49,7 +49,7 @@ static int	take_second_fork(t_philos *philo, pthread_mutex_t *first_fork,
 	return (1);
 }
 
-int	take_forks(t_philos *philo)
+int	take_forks(t_philo *philo)
 {
 	pthread_mutex_t	*first_fork;
 	pthread_mutex_t	*second_fork;
@@ -71,7 +71,7 @@ int	take_forks(t_philos *philo)
 	return (1);
 }
 
-void	release_forks(t_philos *philo)
+void	release_forks(t_philo *philo)
 {
 	if (philo->id % 2 == 0)
 	{

@@ -6,13 +6,13 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 10:44:00 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/28 17:16:41 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/28 18:45:28 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-int	philo_eating(t_philos *philo)
+int	philo_eating(t_philo *philo)
 {
 	long long	eat_end;
 	long long	current_time;
@@ -41,7 +41,7 @@ int	philo_eating(t_philos *philo)
 	return (!get_stop_flag(philo->setup));
 }
 
-int	philo_sleeping(t_philos *philo)
+int	philo_sleeping(t_philo *philo)
 {
 	long long	sleep_end;
 	long long	current_time;
@@ -49,7 +49,7 @@ int	philo_sleeping(t_philos *philo)
 	pthread_mutex_lock(&philo->setup->write_lock);
 	if (!get_stop_flag(philo->setup))
 		printf("%lld %d is sleeping\n", get_timestamp(philo->setup->start_time),
-		philo->id);
+			philo->id);
 	pthread_mutex_unlock(&philo->setup->write_lock);
 	sleep_end = get_timestamp(philo->setup->start_time)
 		+ philo->setup->time_to_sleep;
@@ -63,13 +63,13 @@ int	philo_sleeping(t_philos *philo)
 	return (!get_stop_flag(philo->setup));
 }
 
-int	philo_thinking(t_philos *philo)
+int	philo_thinking(t_philo *philo)
 {
 	pthread_mutex_lock(&philo->setup->write_lock);
 	if (!get_stop_flag(philo->setup))
-		printf("%lld %d is thinking\n", get_timestamp(philo->setup->start_time), philo->id);
+		printf("%lld %d is thinking\n", get_timestamp(philo->setup->start_time),
+			philo->id);
 	pthread_mutex_unlock(&philo->setup->write_lock);
-
 	usleep(500);
 	return (!get_stop_flag(philo->setup));
 }

@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/17 12:32:02 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/28 17:19:27 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/28 18:57:36 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ int	init_values(t_setup *setup)
 	int	i;
 
 	setup->forks = malloc(sizeof(pthread_mutex_t) * setup->nr_philosophers);
-	setup->philos = malloc(sizeof(t_philos) * setup->nr_philosophers);
+	setup->philo = malloc(sizeof(t_philo) * setup->nr_philosophers);
 	setup->stop = 0;
 	setup->all_eaten = 0;
 	setup->is_dead = 0;
@@ -55,6 +55,7 @@ int	init_values(t_setup *setup)
 	}
 	pthread_mutex_init(&setup->write_lock, NULL);
 	pthread_mutex_init(&setup->stop_lock, NULL);
+	gettimeofday(&setup->start_time, NULL);
 	return (0);
 }
 
@@ -65,15 +66,15 @@ void	init_philos(t_setup *setup)
 	i = 0;
 	while (i < setup->nr_philosophers)
 	{
-		setup->philos[i].id = i + 1;
-		setup->philos[i].meals = 0;
-		setup->philos[i].last_meal = 0;
-		setup->philos[i].setup = setup;
-		setup->philos[i].left_fork = &setup->forks[i];
-		setup->philos[i].right_fork = &setup->forks[(i + 1)
+		setup->philo[i].id = i + 1;
+		setup->philo[i].meals = 0;
+		setup->philo[i].last_meal = 0;
+		setup->philo[i].setup = setup;
+		setup->philo[i].left_fork = &setup->forks[i];
+		setup->philo[i].right_fork = &setup->forks[(i + 1)
 			% setup->nr_philosophers];
-		pthread_mutex_init(&setup->philos[i].meals_lock, NULL);
-		pthread_mutex_init(&setup->philos[i].last_meal_lock, NULL);
+		pthread_mutex_init(&setup->philo[i].meals_lock, NULL);
+		pthread_mutex_init(&setup->philo[i].last_meal_lock, NULL);
 		i++;
 	}
 }

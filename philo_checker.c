@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 10:48:30 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/28 17:21:06 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/28 18:45:52 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,24 +17,24 @@ int	check_philosopher_status(t_setup *setup, int i, long long *last_meal,
 {
 	long long	current_time;
 
-	pthread_mutex_lock(&setup->philos[i].last_meal_lock);
-	*last_meal = setup->philos[i].last_meal;
-	pthread_mutex_unlock(&setup->philos[i].last_meal_lock);
+	pthread_mutex_lock(&setup->philo[i].last_meal_lock);
+	*last_meal = setup->philo[i].last_meal;
+	pthread_mutex_unlock(&setup->philo[i].last_meal_lock);
 	current_time = get_timestamp(setup->start_time);
 	if ((current_time - *last_meal) >= setup->time_to_die)
 	{
 		set_stop_flag(setup, 1);
 		usleep(1000);
 		pthread_mutex_lock(&setup->write_lock);
-		printf("%lld %d died\n", current_time, setup->philos[i].id);
+		printf("%lld %d died\n", current_time, setup->philo[i].id);
 		pthread_mutex_unlock(&setup->write_lock);
 		return (1);
 	}
-	pthread_mutex_lock(&setup->philos[i].meals_lock);
+	pthread_mutex_lock(&setup->philo[i].meals_lock);
 	if (setup->times_to_eat > 0
-		&& setup->philos[i].meals >= setup->times_to_eat)
+		&& setup->philo[i].meals >= setup->times_to_eat)
 		(*total_meals)++;
-	pthread_mutex_unlock(&setup->philos[i].meals_lock);
+	pthread_mutex_unlock(&setup->philo[i].meals_lock);
 	return (0);
 }
 

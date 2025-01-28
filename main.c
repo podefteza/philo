@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 13:11:19 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/28 17:20:51 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/28 19:00:17 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,7 @@ int	main(int argc, char **argv)
 	if (init_values(&setup))
 		return (0);
 	init_philos(&setup);
-	gettimeofday(&setup.start_time, NULL);
-	if (task(&setup))
+	if (run_simulation(&setup))
 		return (1);
 	cleanup_resources(&setup);
 	return (0);
