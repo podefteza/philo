@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 10:56:49 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/28 13:06:33 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/28 17:21:19 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ void	*philosopher_routine(void *arg)
 	philo->last_meal = get_timestamp(philo->setup->start_time);
 	pthread_mutex_unlock(&philo->last_meal_lock);
 
-	if (philo->setup->philosophers == 1)
+	if (philo->setup->nr_philosophers == 1)
 	{
 		one_philo(philo);
 		return (NULL);
@@ -70,7 +70,7 @@ int	thread_creation(t_setup *setup, pthread_t *monitor)
 	int	i;
 
 	i = 0;
-	while (i < setup->philosophers)
+	while (i < setup->nr_philosophers)
 	{
 		if (pthread_create(&setup->philos[i].thread, NULL, philosopher_routine,
 				&setup->philos[i]))
@@ -90,7 +90,7 @@ int	task(t_setup *setup)
 	if (thread_creation(setup, &monitor))
 		return (1);
 	i = 0;
-	while (i < setup->philosophers)
+	while (i < setup->nr_philosophers)
 	{
 		pthread_join(setup->philos[i].thread, NULL);
 		i++;

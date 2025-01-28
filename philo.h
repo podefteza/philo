@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/12 11:24:35 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/28 14:55:21 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/28 17:23:18 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,35 +27,34 @@ struct	s_setup;
 
 typedef struct s_philos
 {
-	struct s_setup	*setup;
+	struct s_setup	*setup; 		// pointer to the setup struct
 
-	int				id;
-	int				meals;
-	long long		last_meal;
-	pthread_t		thread; // one thread per philo -> not initialized in init()
-	pthread_mutex_t	*left_fork;
-	pthread_mutex_t	*right_fork;
-	pthread_mutex_t	meals_lock;
-	pthread_mutex_t	last_meal_lock;
+	int				id; 			// id of the philo
+	int				meals; 			// number of meals eaten
+	long long		last_meal; 		// timestamp of the last meal
+	pthread_t		thread; 		// thread of the philo
+	pthread_mutex_t	*left_fork; 	// his own fork
+	pthread_mutex_t	*right_fork; 	// the fork of the next philo
+	pthread_mutex_t	meals_lock; 	// lock for the meals variable
+	pthread_mutex_t	last_meal_lock;	// lock for the last_meal variable
 }					t_philos;
 
 typedef struct s_setup
 {
-	t_philos		*philos;
-	int				philosophers;
+	t_philos		*philos; 			// array of philos
+	int				nr_philosophers;
 	int				time_to_die;
 	int				time_to_eat;
 	int				time_to_sleep;
 	int				times_to_eat;
-	struct timeval	start_time;
-	long long		elapsed_time;
-	//pthread_mutex_t	time_lock;
-	pthread_mutex_t	*forks; // does it make sense to be inside this struct or move to t_philos
-	pthread_mutex_t	write_lock;
-	pthread_mutex_t	stop_lock;
-	int				stop;
-	int				all_eaten;
-	int				is_dead;
+	struct timeval	start_time;			// start time of the simulation
+	long long		elapsed_time;		// elapsed time since the start of the simulation
+	pthread_mutex_t	*forks;				// array of forks
+	pthread_mutex_t	write_lock;			// lock for the write function
+	pthread_mutex_t	stop_lock;			// lock for the simulation stop variable
+	int				stop;				// flag to stop the simulation
+	int				all_eaten;			// flag to stop the simulation when all philosophers have eaten
+	int				is_dead;			// flag to stop the simulation when a philosopher dies
 }					t_setup;
 
 // utils.c
@@ -79,7 +78,6 @@ int					philo_sleeping(t_philos *philo);
 int					philo_thinking(t_philos *philo);
 
 // philo_checker.c
-//int					check_all_philosophers_eaten(t_setup *setup);
 int					check_philosopher_status(t_setup *setup, int i,
 						long long *last_meal, int *total_meals);
 int					check_all_philosophers(t_setup *setup, int *total_meals);

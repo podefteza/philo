@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 10:44:00 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/28 13:32:25 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/28 17:16:41 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,6 @@ int	philo_eating(t_philos *philo)
 	long long	eat_end;
 	long long	current_time;
 
-	//if (get_stop_flag(philo->setup))
-	//	return (0); // Stop if simulation is over
-
 	pthread_mutex_lock(&philo->last_meal_lock);
 	philo->last_meal = get_timestamp(philo->setup->start_time);
 	pthread_mutex_unlock(&philo->last_meal_lock);
@@ -27,7 +24,7 @@ int	philo_eating(t_philos *philo)
 	philo->meals++;
 	pthread_mutex_unlock(&philo->meals_lock);
 	pthread_mutex_lock(&philo->setup->write_lock);
-	if (!get_stop_flag(philo->setup)) // Check again before printing
+	if (!get_stop_flag(philo->setup))
 		printf("%lld %d is eating\n", get_timestamp(philo->setup->start_time),
 			philo->id);
 	pthread_mutex_unlock(&philo->setup->write_lock);
@@ -49,11 +46,8 @@ int	philo_sleeping(t_philos *philo)
 	long long	sleep_end;
 	long long	current_time;
 
-	//if (get_stop_flag(philo->setup))
-	//	return (0); // Stop if simulation is over
-
 	pthread_mutex_lock(&philo->setup->write_lock);
-	if (!get_stop_flag(philo->setup)) // Check again before printing
+	if (!get_stop_flag(philo->setup))
 		printf("%lld %d is sleeping\n", get_timestamp(philo->setup->start_time),
 		philo->id);
 	pthread_mutex_unlock(&philo->setup->write_lock);
@@ -71,11 +65,8 @@ int	philo_sleeping(t_philos *philo)
 
 int	philo_thinking(t_philos *philo)
 {
-	//if (get_stop_flag(philo->setup))
-	//	return (0); // Stop if simulation is over
-
 	pthread_mutex_lock(&philo->setup->write_lock);
-	if (!get_stop_flag(philo->setup)) // Check again before printing
+	if (!get_stop_flag(philo->setup))
 		printf("%lld %d is thinking\n", get_timestamp(philo->setup->start_time), philo->id);
 	pthread_mutex_unlock(&philo->setup->write_lock);
 

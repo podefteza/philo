@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 13:11:19 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/22 16:15:19 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/28 17:20:51 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ int	main(int argc, char **argv)
 	}
 	if (init_args(argc, argv, &setup))
 		return (0);
-	if (setup.philosophers <= 0 || setup.philosophers > MAX_PHILOSOPHERS)
+	if (setup.nr_philosophers <= 0 || setup.nr_philosophers > MAX_PHILOSOPHERS)
 	{
 		printf("Error. Number of philosophers must be between 1 and %d.\n",
 			MAX_PHILOSOPHERS);

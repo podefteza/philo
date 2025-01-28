@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 10:48:30 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/28 13:52:16 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/28 17:21:06 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ int	check_all_philosophers(t_setup *setup, int *total_meals)
 
 	i = 0;
 	*total_meals = 0;
-	while (i < setup->philosophers)
+	while (i < setup->nr_philosophers)
 	{
 		if (get_stop_flag(setup))
 			return (1);
@@ -66,11 +66,11 @@ void	*check_starvation(void *arg)
 	check_interval = (setup->time_to_die / 10) * 1000;
 	if (check_interval > 1000)
 		check_interval = 1000;
-	while (!get_stop_flag(setup) && (setup->philosophers != 1))
+	while (!get_stop_flag(setup) && (setup->nr_philosophers != 1))
 	{
 		if (check_all_philosophers(setup, &total_meals))
 			return (NULL);
-		if (setup->times_to_eat > 0 && total_meals == setup->philosophers)
+		if (setup->times_to_eat > 0 && total_meals == setup->nr_philosophers)
 		{
 			set_stop_flag(setup, 1);
 			usleep(setup->time_to_eat * 1000);

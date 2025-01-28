@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/12 11:16:53 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/22 11:22:49 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/28 17:21:42 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,23 +39,6 @@ long long	ft_atoi(const char *nptr, int *error_flag)
 		nptr++;
 	}
 	return (number * signal);
-}
-
-/* add the following line in main, before cleanup_resources:
-	print_meals_summary(&setup); */
-void	print_meals_summary(t_setup *setup)
-{
-	int	i;
-
-	i = 0;
-	printf("\n========== Simulation ended ==========\n");
-	while (i < setup->philosophers)
-	{
-		printf("Philosopher %d ate %d times\n", setup->philos[i].id,
-			setup->philos[i].meals);
-		i++;
-	}
-	printf("========== Meals summary ==========\n");
 }
 
 long long	get_timestamp(struct timeval start_time)
