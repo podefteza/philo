@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/17 12:32:02 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/22 15:39:13 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/28 13:11:27 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ int	init_values(t_setup *setup)
 	}
 	pthread_mutex_init(&setup->write_lock, NULL);
 	pthread_mutex_init(&setup->stop_lock, NULL);
-	pthread_mutex_init(&setup->time_lock, NULL);
+	//pthread_mutex_init(&setup->time_lock, NULL);
 	return (0);
 }
 

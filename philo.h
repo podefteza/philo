@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/12 11:24:35 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/22 14:41:37 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/28 13:11:23 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ typedef struct s_setup
 	int				times_to_eat;
 	struct timeval	start_time;
 	long long		elapsed_time;
-	pthread_mutex_t	time_lock;
+	//pthread_mutex_t	time_lock;
 	pthread_mutex_t	*forks;
 	pthread_mutex_t	write_lock;
 	pthread_mutex_t	stop_lock;

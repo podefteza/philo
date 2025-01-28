@@ -36,6 +36,14 @@ ${NAME}: ${OBJS}
 tsanitize: fclean
 	${CC} ${CFLAGS} -fsanitize=thread ${SRCS} -o ${NAME}
 	@echo "Compilation with ThreadSanitizer successful."
+	
+asanitize: fclean
+	${CC} ${CFLAGS} -fsanitize=address ${SRCS} -o ${NAME}
+	@echo "Compilation with AddressSanitizer successful."
+
+lsanitize: fclean
+	${CC} ${CFLAGS} -fsanitize=leak ${SRCS} -o ${NAME}
+	@echo "Compilation with LeakSanitizer successful."
 
 clean:
 	@rm -f ${OBJS}

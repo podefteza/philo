@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/18 15:25:26 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/22 09:12:30 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/28 13:32:43 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,8 @@ void	log_fork_taken(t_philos *philo)
 
 	pthread_mutex_lock(&philo->setup->write_lock);
 	timestamp = get_timestamp(philo->setup->start_time);
-	printf("%lld %d has taken a fork\n", timestamp, philo->id);
+	if (!get_stop_flag(philo->setup)) // Check again before printing
+		printf("%lld %d has taken a fork\n", timestamp, philo->id);
 	pthread_mutex_unlock(&philo->setup->write_lock);
 }
 

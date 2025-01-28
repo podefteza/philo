@@ -6,35 +6,11 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 10:48:30 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/22 13:46:44 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/28 13:02:44 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
-
-int	check_all_philosophers_eaten(t_setup *setup)
-{
-	int	i;
-	int	total_meals;
-
-	total_meals = 0;
-	i = 0;
-	while (i < setup->philosophers)
-	{
-		pthread_mutex_lock(&setup->philos[i].meals_lock);
-		if (setup->philos[i].meals >= setup->times_to_eat)
-			total_meals++;
-		pthread_mutex_unlock(&setup->philos[i].meals_lock);
-		i++;
-	}
-	if (total_meals == setup->philosophers)
-	{
-		set_stop_flag(setup, 1);
-		setup->all_eaten = 1;
-		return (1);
-	}
-	return (0);
-}
 
 int	check_philosopher_status(t_setup *setup, int i, long long *last_meal,
 		int *total_meals)
