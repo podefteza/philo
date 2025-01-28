@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/12 11:24:35 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/28 14:51:57 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/28 14:55:21 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,8 +54,8 @@ typedef struct s_setup
 	pthread_mutex_t	write_lock;
 	pthread_mutex_t	stop_lock;
 	int				stop;
-	//int				all_eaten; // not being used...?
-	// int				is_dead; // not being used...?
+	int				all_eaten;
+	int				is_dead;
 }					t_setup;
 
 // utils.c
