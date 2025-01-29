@@ -1,42 +1,91 @@
-# Philosophers Project: Overview
-The Philosophers project is an engaging simulation designed to test concurrency management using threads and mutexes in C.
+# Philosophers Project 🍴🕰️  
+A solution to Dijkstra's Dining Philosophers Problem using threads and mutexes in C.
 
-## Dining Philosophers Problem
-This project demonstrates a classic problem in computer science often referred to as the "Dining Philosophers Problem." Philosophers alternate between eating, thinking, and sleeping. To eat, a philosopher needs two forks: one on their left and one on their right. They must avoid starving and minimize contention over shared resources (forks).
- 
-### Key Concepts
-- **Threads**: parts of the program responsible for performing specific tasks. Each philosopher in this simulation is represented as a thread, working independently to eat, sleep and think.
-- **Concurrency**: multiple tasks running at the same time while sharing resources. In this project, the philosophers represent tasks that need to share forks. Concurrency ensures that philosophers coordinate their actions so that no two philosophers attempt to grab the same fork simultaneously.
-- **Mutexes (Mutual Exclusion)**: tools used in multithreaded programs to manage access to shared resources and prevent race conditions. A race condition occurs when multiple threads access shared data simultaneously, leading to unexpected results. By locking a mutex, a thread gains exclusive access to a resource, ensuring no other thread can use it until the mutex is unlocked.
-- **Deadlocks**: occur when two or more threads are stuck waiting for each other, preventing any of them from proceeding. In this simulation, a deadlock could happen if every philosopher picks up one fork and waits indefinitely for the other fork to become available. Proper logic and synchronization prevent this situation.
+## 📖 Overview  
+This project simulates philosophers sitting around a table, alternating between eating, thinking, and sleeping. Each philosopher must use two forks to eat, leading to a classic concurrency problem. The solution ensures:  
 
-## Program Features
-```bash
-./philo number_of_philosophers time_to_die time_to_eat time_to_sleep [number_of_times_each_philosopher_must_eat]
+- No deadlocks  
+- No starvation  
+- Thread-safe resource sharing  
+
+## 🎯 Problem Statement  
+Philosophers represent threads, and forks represent shared resources (mutexes). The challenge is to:  
+
+- Prevent philosophers from starving.  
+- Avoid deadlocks when acquiring forks.  
+- Synchronize actions without data races.  
+
+## 🛠️ Solution Approach  
+
+### 🔑 Key Techniques  
+- **Mutexes**: Protect forks and shared data (e.g., meal counts, timestamps).  
+- **Staggered Start**: Even-numbered philosophers delay starting to reduce contention.  
+- **Monitor Thread**: Continuously checks for philosopher starvation or completion.  
+
+### 🔄 Deadlock Prevention  
+#### **Fork Ordering:**  
+- **Odd philosophers**:  Left fork 🍴👈 → 👉🍴 Right fork 
+- **Even philosophers**: Right fork 👉🍴 → 🍴👈 Left fork
+
+🔓 **Immediate Fork Release**: If the simulation stops (e.g., a philosopher dies), all forks are released.  
+
+## 🚀 Features  
+
+### 📌 Input Arguments  
+``` bash
+./philo <number_of_philosophers> <time_to_die> <time_to_eat> <time_to_sleep> [optional_times_to_eat]  
 ```
-- **number_of_philosophers**: Total number of philosophers and forks.
-- **time_to_die**: Time (ms) before a philosopher dies if they don’t eat.
-- **time_to_eat**: Time (ms) a philosopher spends eating.
-- **time_to_sleep**: Time (ms) a philosopher spends sleeping.
-- **[number_of_times_each_philosopher_must_eat] (optional)**: Stops simulation if all philosophers eat this many times.
+Example:  
+``` bash
+./philo 5 800 200 200 7  
+```
+Simulates **5 philosophers** who must each eat **7 times**. They take **200ms to eat** and after that, **200ms to sleep**. Then, they start thinking until they have both forks available again to eat. If **800ms** pass since the **start of the simulation** or since the **start of their last meal**, they die.
 
-## Implementation Notes
-### Threads and Mutexes:
-- Each philosopher is represented as a thread.
-- Mutexes protect forks to prevent race conditions.
-### Global Variables:
-- Forbidden by project rules. All shared data is managed through structures passed to threads.
-### Accuracy:
-- Death messages must be logged no later than 10ms after the actual death.
-- State messages are synchronized to avoid overlapping.
+### 📄 Output  
+``` bash
+timestamp X has taken a fork
+timestamp X is eating
+timestamp X is sleeping
+timestamp X is thinking
+timestamp X died
+```
+The message of a philosopher's death needs to be displayed within 10ms of actual death.
 
-## Rules and Constraints
-### No Data Races:
-- Ensure proper synchronization using mutexes.
-### Forks Management:
-- Each fork is shared between two philosophers, requiring careful mutex usage.
-### Philosopher Behavior:
-- Philosophers think, eat, and sleep in loops, avoiding starvation.
-### Error Handling:
-- Handles invalid arguments (non-numeric, out of range, or missing).
-- Ends the simulation immediately if number_of_times_each_philosopher_must_eat == 0.
+## 🔍 Detailed Program Flow  
+
+### 📝 Argument Validation  
+- The program begins by validating the command-line arguments using `init_args()`.  
+- This ensures that the arguments comply with the rules (e.g., positive integers within valid ranges).  
+- If the optional `times_to_eat` argument is `0`, the simulation exits immediately since no philosopher is required to eat.  
+
+### 🛠 Initialization  
+- The `init_values()` function initializes the main setup structure, allocating memory and creating mutexes for shared resources like forks and control flags.  
+- The `init_philos()` function initializes each philosopher, associating them with their respective forks and preparing individual states, such as meal counts and last meal timestamps.  
+- Each philosopher is represented by a thread.  
+
+### 🎭 Simulation Management  
+- The `run_simulation()` function orchestrates the simulation by calling `thread_creation()`, which creates threads for each philosopher and a monitor thread.  
+- Each philosopher thread runs `philosopher_routine()`, simulating the life cycle of a philosopher:  
+  - Taking forks  
+  - Eating  
+  - Sleeping  
+  - Thinking  
+- To prevent contention, even-numbered philosophers begin with a small delay (half the eating time) to stagger their actions.  
+
+### 🍽 Fork Management  
+- Philosophers use the `take_forks()` function to attempt to lock the left and right forks.  
+- If a fork is unavailable, they wait for a short time before trying again, ensuring fairness and avoiding deadlocks.  
+- After eating, forks are released using `release_forks()`.  
+
+### 👀 Monitor Thread  
+- The monitor thread runs `check_starvation()`, periodically checking the state of all philosophers to ensure no philosopher starves.  
+- If a philosopher hasn’t eaten within the `time_to_die`, the simulation stops, and the program prints a death message.  
+- If the optional `times_to_eat` argument is provided, the monitor also checks if all philosophers have eaten the required number of meals, stopping the simulation when the condition is met.  
+
+### 🔄 Thread Synchronization  
+- After thread creation, `run_simulation()` waits for all philosopher and monitor threads to complete using `pthread_join()`.  
+- This ensures the main program only proceeds to cleanup after all threads finish execution.  
+
+### 🧹 Resource Cleanup  
+- The `cleanup_resources()` function destroys all mutexes (e.g., forks, control locks) and frees allocated memory for philosophers and forks.  
+- This ensures the program exits cleanly without memory leaks.
