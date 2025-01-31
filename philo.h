@@ -6,14 +6,12 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/12 11:24:35 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/28 19:47:47 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/31 15:00:20 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PHILO_H
 # define PHILO_H
-
-# define MAX_PHILOSOPHERS 200
 
 # include <pthread.h>
 # include <stdio.h>
@@ -54,7 +52,7 @@ typedef struct s_setup
 	pthread_mutex_t	stop_lock;
 	int				stop;
 	int				all_eaten;
-	int				is_dead;
+	int				is_dead; //check where this is being used
 }					t_setup;
 
 // utils.c
@@ -65,7 +63,7 @@ int					get_stop_flag(t_setup *setup);
 
 // init.c
 int					init_args(int argc, char **argv, t_setup *setup);
-int					init_values(t_setup *setup);
+void				init_values(t_setup *setup);
 void				init_philos(t_setup *setup);
 
 // take_forks.c

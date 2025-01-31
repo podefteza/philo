@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/17 12:32:02 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/28 18:57:36 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/31 14:57:29 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ int	init_args(int argc, char **argv, t_setup *setup)
 	return (0);
 }
 
-int	init_values(t_setup *setup)
+void	init_values(t_setup *setup)
 {
 	int	i;
 
@@ -56,7 +56,6 @@ int	init_values(t_setup *setup)
 	pthread_mutex_init(&setup->write_lock, NULL);
 	pthread_mutex_init(&setup->stop_lock, NULL);
 	gettimeofday(&setup->start_time, NULL);
-	return (0);
 }
 
 void	init_philos(t_setup *setup)

@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 10:48:30 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/28 18:45:52 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/31 14:55:08 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,8 +75,8 @@ void	*check_starvation(void *arg)
 			set_stop_flag(setup, 1);
 			usleep(setup->time_to_eat * 1000);
 			pthread_mutex_lock(&setup->write_lock);
-			printf("%lld All philosophers have eaten %d times\n",
-				get_timestamp(setup->start_time), setup->times_to_eat);
+			printf("All philosophers have eaten %d times\n",
+				setup->times_to_eat);
 			pthread_mutex_unlock(&setup->write_lock);
 			return (NULL);
 		}

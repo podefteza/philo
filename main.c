@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 13:11:19 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/28 19:00:17 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/31 14:58:34 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,17 +24,18 @@ int	main(int argc, char **argv)
 	}
 	if (init_args(argc, argv, &setup))
 		return (0);
-	if (setup.nr_philosophers <= 0 || setup.nr_philosophers > MAX_PHILOSOPHERS)
+	if (setup.nr_philosophers <= 0 || setup.nr_philosophers > 200)
 	{
-		printf("Error. Number of philosophers must be between 1 and %d.\n",
-			MAX_PHILOSOPHERS);
+		printf("Error. Number of philosophers must be between 1 and 200.\n");
 		return (1);
 	}
-	if (init_values(&setup))
-		return (0);
+	init_values(&setup);
 	init_philos(&setup);
 	if (run_simulation(&setup))
+	{
+		cleanup_resources(&setup);
 		return (1);
+	}
 	cleanup_resources(&setup);
 	return (0);
 }

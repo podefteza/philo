@@ -6,21 +6,23 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/18 15:25:26 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/28 18:46:41 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/01/31 15:16:14 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-void	log_fork_taken(t_philo *philo)
+void	logs_fork_taken(t_philo *philo)
 {
 	long long	timestamp;
 
-	pthread_mutex_lock(&philo->setup->write_lock);
-	timestamp = get_timestamp(philo->setup->start_time);
 	if (!get_stop_flag(philo->setup))
+	{
+		pthread_mutex_lock(&philo->setup->write_lock);
+		timestamp = get_timestamp(philo->setup->start_time);
 		printf("%lld %d has taken a fork\n", timestamp, philo->id);
-	pthread_mutex_unlock(&philo->setup->write_lock);
+		pthread_mutex_unlock(&philo->setup->write_lock);
+	}
 }
 
 static int	take_first_fork(t_philo *philo, pthread_mutex_t *first_fork)
@@ -31,7 +33,7 @@ static int	take_first_fork(t_philo *philo, pthread_mutex_t *first_fork)
 		pthread_mutex_unlock(first_fork);
 		return (0);
 	}
-	log_fork_taken(philo);
+	logs_fork_taken(philo);
 	return (1);
 }
 
@@ -45,7 +47,7 @@ static int	take_second_fork(t_philo *philo, pthread_mutex_t *first_fork,
 		pthread_mutex_unlock(second_fork);
 		return (0);
 	}
-	log_fork_taken(philo);
+	logs_fork_taken(philo);
 	return (1);
 }
 
