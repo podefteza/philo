@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/18 15:25:26 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/31 15:16:14 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/02/01 13:21:23 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ void	logs_fork_taken(t_philo *philo)
 {
 	long long	timestamp;
 
-	if (!get_stop_flag(philo->setup))
+	if (get_stop_flag(philo->setup) == CONTINUE_SIMULATION)
 	{
 		pthread_mutex_lock(&philo->setup->write_lock);
 		timestamp = get_timestamp(philo->setup->start_time);
@@ -28,27 +28,27 @@ void	logs_fork_taken(t_philo *philo)
 static int	take_first_fork(t_philo *philo, pthread_mutex_t *first_fork)
 {
 	pthread_mutex_lock(first_fork);
-	if (get_stop_flag(philo->setup))
+	if (get_stop_flag(philo->setup) == STOP_SIMULATION)
 	{
 		pthread_mutex_unlock(first_fork);
-		return (0);
+		return (STOP_SIMULATION);
 	}
 	logs_fork_taken(philo);
-	return (1);
+	return (CONTINUE_SIMULATION);
 }
 
 static int	take_second_fork(t_philo *philo, pthread_mutex_t *first_fork,
 		pthread_mutex_t *second_fork)
 {
 	pthread_mutex_lock(second_fork);
-	if (get_stop_flag(philo->setup))
+	if (get_stop_flag(philo->setup) == STOP_SIMULATION)
 	{
 		pthread_mutex_unlock(first_fork);
 		pthread_mutex_unlock(second_fork);
-		return (0);
+		return (STOP_SIMULATION);
 	}
 	logs_fork_taken(philo);
-	return (1);
+	return (CONTINUE_SIMULATION);
 }
 
 int	take_forks(t_philo *philo)
@@ -66,11 +66,11 @@ int	take_forks(t_philo *philo)
 		first_fork = philo->left_fork;
 		second_fork = philo->right_fork;
 	}
-	if (!take_first_fork(philo, first_fork))
-		return (0);
-	if (!take_second_fork(philo, first_fork, second_fork))
-		return (0);
-	return (1);
+	if (take_first_fork(philo, first_fork) == STOP_SIMULATION)
+		return (STOP_SIMULATION);
+	if (take_second_fork(philo, first_fork, second_fork) == STOP_SIMULATION)
+		return (STOP_SIMULATION);
+	return (CONTINUE_SIMULATION);
 }
 
 void	release_forks(t_philo *philo)

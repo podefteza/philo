@@ -6,12 +6,15 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/12 11:24:35 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/31 15:00:20 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/02/01 13:49:35 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PHILO_H
 # define PHILO_H
+
+# define STOP_SIMULATION 1
+# define CONTINUE_SIMULATION 0
 
 # include <pthread.h>
 # include <stdio.h>
@@ -52,7 +55,6 @@ typedef struct s_setup
 	pthread_mutex_t	stop_lock;
 	int				stop;
 	int				all_eaten;
-	int				is_dead; //check where this is being used
 }					t_setup;
 
 // utils.c

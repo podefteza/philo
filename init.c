@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/17 12:32:02 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/01/31 14:57:29 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/02/01 13:02:01 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ int	init_args(int argc, char **argv, t_setup *setup)
 	{
 		setup->times_to_eat = ft_atoi(argv[5], &error_flag);
 		if (setup->times_to_eat == 0 && !error_flag)
-			return (1);
+			return (STOP_SIMULATION);
 	}
 	else
 		setup->times_to_eat = 0;
@@ -33,9 +33,9 @@ int	init_args(int argc, char **argv, t_setup *setup)
 		|| setup->time_to_sleep <= 0 || setup->times_to_eat < 0)
 	{
 		printf("Error. Test only with positive integer numbers.\n");
-		return (1);
+		return (STOP_SIMULATION);
 	}
-	return (0);
+	return (CONTINUE_SIMULATION);
 }
 
 void	init_values(t_setup *setup)
@@ -46,7 +46,6 @@ void	init_values(t_setup *setup)
 	setup->philo = malloc(sizeof(t_philo) * setup->nr_philosophers);
 	setup->stop = 0;
 	setup->all_eaten = 0;
-	setup->is_dead = 0;
 	i = 0;
 	while (i < setup->nr_philosophers)
 	{
