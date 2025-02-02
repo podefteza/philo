@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 10:56:49 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/02/01 13:49:32 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/02/02 16:34:50 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ void	*philosopher_routine(void *arg)
 		return (NULL);
 	}
 	if (philo->id % 2 == 0)
-		delay_with_stop_check(philo->setup, philo->setup->time_to_eat / 2);
+		delay_with_stop_check(philo->setup, 10);
 	while (get_stop_flag(philo->setup) == CONTINUE_SIMULATION)
 	{
 		if (take_forks(philo) == STOP_SIMULATION

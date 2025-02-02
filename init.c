@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/17 12:32:02 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/02/01 13:02:01 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/02/02 16:03:21 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,8 +69,11 @@ void	init_philos(t_setup *setup)
 		setup->philo[i].last_meal = 0;
 		setup->philo[i].setup = setup;
 		setup->philo[i].left_fork = &setup->forks[i];
-		setup->philo[i].right_fork = &setup->forks[(i + 1)
-			% setup->nr_philosophers];
+		if (setup->nr_philosophers == 1)
+			setup->philo[i].right_fork = NULL;
+		else
+			setup->philo[i].right_fork = &setup->forks[(i + 1)
+				% setup->nr_philosophers];
 		pthread_mutex_init(&setup->philo[i].meals_lock, NULL);
 		pthread_mutex_init(&setup->philo[i].last_meal_lock, NULL);
 		i++;

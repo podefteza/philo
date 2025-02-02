@@ -6,7 +6,7 @@
 /*   By: carlos-j <carlos-j@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 10:48:30 by carlos-j          #+#    #+#             */
-/*   Updated: 2025/02/01 12:47:17 by carlos-j         ###   ########.fr       */
+/*   Updated: 2025/02/02 16:14:28 by carlos-j         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,10 +56,21 @@ int	check_all_philosophers(t_setup *setup, int *total_meals)
 	return (CONTINUE_SIMULATION);
 }
 
+void	*all_philosophers_eaten(t_setup *setup)
+{
+	set_stop_flag(setup, STOP_SIMULATION);
+	usleep(setup->time_to_eat * 1000);
+	pthread_mutex_lock(&setup->write_lock);
+	printf("%lld All philosophers have eaten %d times\n",
+		get_timestamp(setup->start_time), setup->times_to_eat);
+	pthread_mutex_unlock(&setup->write_lock);
+	return (NULL);
+}
+
 void	*check_starvation(void *arg)
 {
 	t_setup	*setup;
-	int		total_meals;
+	int		philos_full;
 	int		check_interval;
 
 	setup = (t_setup *)arg;
@@ -68,18 +79,11 @@ void	*check_starvation(void *arg)
 		check_interval = 1000;
 	while (!get_stop_flag(setup) && (setup->nr_philosophers != 1))
 	{
-		if (check_all_philosophers(setup, &total_meals))
+		philos_full = 0;
+		if (check_all_philosophers(setup, &philos_full))
 			return (NULL);
-		if (setup->times_to_eat > 0 && total_meals == setup->nr_philosophers)
-		{
-			set_stop_flag(setup, STOP_SIMULATION);
-			usleep(setup->time_to_eat * 1000);
-			pthread_mutex_lock(&setup->write_lock);
-			printf("%lld All philosophers have eaten %d times\n",
-				get_timestamp(setup->start_time), setup->times_to_eat);
-			pthread_mutex_unlock(&setup->write_lock);
-			return (NULL);
-		}
+		if (setup->times_to_eat > 0 && philos_full == setup->nr_philosophers)
+			return (all_philosophers_eaten(setup));
 		usleep(check_interval);
 	}
 	return (NULL);
