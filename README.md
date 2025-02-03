@@ -2,15 +2,7 @@
 A solution to Dijkstra's Dining Philosophers Problem using threads and mutexes in C.
 
 ## 📖 Overview  
-This project simulates philosophers sitting around a table, alternating between eating, thinking, and sleeping. Each philosopher must use two forks to eat, leading to a classic concurrency problem. The solution ensures:  
-
-- No deadlocks  
-- No starvation  
-- Thread-safe resource sharing  
-
-## 🎯 Problem Statement  
-Philosophers represent threads, and forks represent shared resources (mutexes). The challenge is to:  
-
+This project simulates philosophers sitting around a table, alternating between eating, thinking, and sleeping. Each philosopher must use two forks to eat, leading to a classic concurrency problem. Philosophers represent threads, and forks represent shared resources (mutexes). The challenge is to:
 - Prevent philosophers from starving.  
 - Avoid deadlocks when acquiring forks.  
 - Synchronize actions without data races.  
